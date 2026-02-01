@@ -8,6 +8,7 @@ import { PropertyCard } from "@/components/PropertyCard";
 import { PriceGuessForm } from "@/components/PriceGuessForm";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { KeyboardHint } from "@/components/KeyboardHint";
 
 interface GameClientProps {
   zone: Zone;
@@ -71,7 +72,7 @@ export function GameClient({ zone, listing, prevId, nextId, total, current }: Ga
               title="Alt + ←"
             >
               <span className="bg-slate-800/80 hover:bg-slate-700 text-white p-3 rounded-full transition-colors shadow-lg">←</span>
-              <kbd className="hidden sm:block text-[10px] text-slate-500 bg-slate-800/60 px-1 rounded">Alt ←</kbd>
+              <KeyboardHint keys="Alt ←" className="hidden sm:block" />
             </Link>
           )}
 
@@ -85,7 +86,7 @@ export function GameClient({ zone, listing, prevId, nextId, total, current }: Ga
               title="Alt + →"
             >
               <span className="bg-slate-800/80 hover:bg-slate-700 text-white p-3 rounded-full transition-colors shadow-lg">→</span>
-              <kbd className="hidden sm:block text-[10px] text-slate-500 bg-slate-800/60 px-1 rounded">Alt →</kbd>
+              <KeyboardHint keys="Alt →" className="hidden sm:block" />
             </Link>
           )}
         </div>

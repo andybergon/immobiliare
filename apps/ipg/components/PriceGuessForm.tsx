@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { KeyboardHint } from "./KeyboardHint";
 
 interface PriceGuessFormProps {
   onSubmit: (guess: number) => void;
@@ -9,6 +10,7 @@ interface PriceGuessFormProps {
 
 export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormProps) {
   const [thousands, setThousands] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/\D/g, "");
@@ -27,14 +29,16 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
   };
 
   const hasValue = thousands.length > 0;
-
   const inputWidth = Math.max(3, thousands.length + 1);
 
   return (
     <form onSubmit={handleSubmit}>
-      <label htmlFor="price-guess" className="block text-lg mb-2">
-        Quanto costa questo immobile?
-      </label>
+      <div className="flex items-center gap-2 mb-2">
+        <label htmlFor="price-guess" className="text-lg">
+          Quanto costa questo immobile?
+        </label>
+        {!isFocused && <KeyboardHint keys="Tab" className="hidden sm:inline" />}
+      </div>
       <div className="flex gap-2">
         <div className="flex-1 bg-slate-600 rounded-lg flex items-center px-4 py-4">
           <span className="text-slate-400 text-2xl mr-2">€</span>
@@ -44,6 +48,8 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
             inputMode="numeric"
             value={thousands}
             onChange={handleChange}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             placeholder="350"
             disabled={disabled}
             tabIndex={1}
@@ -60,7 +66,7 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
           title="Premi Invio per confermare"
         >
           <span className="hidden sm:inline">Indovina</span>
-          <kbd className="bg-emerald-700 px-2 py-1 rounded text-sm">↵</kbd>
+          <KeyboardHint keys="↵" className="bg-emerald-700 border-emerald-600" />
         </button>
       </div>
     </form>
