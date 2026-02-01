@@ -66,10 +66,12 @@ export function GameClient({ zone, listing, prevId, nextId, total, current }: Ga
           {prevId && (
             <Link
               href={`/play/${zone.slug}/${prevId}`}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 sm:-translate-x-14 z-10 bg-slate-800/80 hover:bg-slate-700 text-white p-3 rounded-full transition-colors shadow-lg"
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 sm:-translate-x-14 z-10 flex flex-col items-center gap-1"
               aria-label="Annuncio precedente"
+              title="Alt + ←"
             >
-              ←
+              <span className="bg-slate-800/80 hover:bg-slate-700 text-white p-3 rounded-full transition-colors shadow-lg">←</span>
+              <kbd className="hidden sm:block text-[10px] text-slate-500 bg-slate-800/60 px-1 rounded">Alt ←</kbd>
             </Link>
           )}
 
@@ -78,10 +80,12 @@ export function GameClient({ zone, listing, prevId, nextId, total, current }: Ga
           {nextId && (
             <Link
               href={`/play/${zone.slug}/${nextId}`}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 sm:translate-x-14 z-10 bg-slate-800/80 hover:bg-slate-700 text-white p-3 rounded-full transition-colors shadow-lg"
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 sm:translate-x-14 z-10 flex flex-col items-center gap-1"
               aria-label="Annuncio successivo"
+              title="Alt + →"
             >
-              →
+              <span className="bg-slate-800/80 hover:bg-slate-700 text-white p-3 rounded-full transition-colors shadow-lg">→</span>
+              <kbd className="hidden sm:block text-[10px] text-slate-500 bg-slate-800/60 px-1 rounded">Alt →</kbd>
             </Link>
           )}
         </div>
