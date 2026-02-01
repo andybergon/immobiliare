@@ -46,7 +46,6 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
             onChange={handleChange}
             placeholder="350"
             disabled={disabled}
-            autoFocus
             tabIndex={1}
             style={{ width: `${inputWidth}ch` }}
             className="bg-transparent text-2xl focus:outline-none disabled:opacity-50 text-white"
