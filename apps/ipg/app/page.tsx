@@ -9,40 +9,29 @@ export default function Home() {
           Riesci a indovinare il prezzo degli immobili a Roma?
         </p>
 
-        <h2 className="text-2xl font-semibold mb-6">Scegli come giocare</h2>
+        <h2 className="text-2xl font-semibold mb-8">Scegli come giocare</h2>
 
-        <div className="grid gap-4 max-w-md mx-auto">
+        <div className="grid gap-6 max-w-lg mx-auto">
           <Link
             href="/map"
-            className="block p-6 bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors text-left"
+            className="block p-8 bg-blue-600 rounded-2xl hover:bg-blue-700 hover:scale-[1.02] transition-all text-center"
           >
-            <div className="flex items-center gap-4">
-              <span className="text-4xl">🗺️</span>
-              <div>
-                <h3 className="text-xl font-bold">Mappa</h3>
-                <p className="text-blue-200 text-sm">
-                  Scegli un quartiere dalla mappa di Roma
-                </p>
-              </div>
-            </div>
-            <span className="inline-block mt-2 text-xs bg-blue-500 px-2 py-1 rounded">
-              Consigliato
-            </span>
+            <span className="text-6xl block mb-4">🗺️</span>
+            <h3 className="text-2xl font-bold mb-2">Mappa</h3>
+            <p className="text-blue-200">
+              Scegli un quartiere dalla mappa di Roma
+            </p>
           </Link>
 
           <Link
             href="/play/axa"
-            className="block p-6 bg-slate-700 rounded-xl hover:bg-slate-600 transition-colors text-left"
+            className="block p-8 bg-slate-700 rounded-2xl hover:bg-slate-600 hover:scale-[1.02] transition-all text-center"
           >
-            <div className="flex items-center gap-4">
-              <span className="text-4xl">🎮</span>
-              <div>
-                <h3 className="text-xl font-bold">Arcade</h3>
-                <p className="text-slate-300 text-sm">
-                  Quartiere casuale, inizia subito
-                </p>
-              </div>
-            </div>
+            <span className="text-6xl block mb-4">🎮</span>
+            <h3 className="text-2xl font-bold mb-2">Arcade</h3>
+            <p className="text-slate-300">
+              Quartiere casuale, inizia subito
+            </p>
           </Link>
         </div>
       </div>
