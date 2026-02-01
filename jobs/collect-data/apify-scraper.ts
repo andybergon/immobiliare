@@ -191,7 +191,7 @@ export async function scrapeWithApify(
   };
 
   // Create a named task for visibility in Apify console
-  const taskName = `ipg-${zone.area}-${zone.slug}`;
+  const taskName = `${zone.region}>${zone.city}>${zone.area}>${zone.slug}`;
   console.log(`  Creating task: ${taskName}`);
 
   const actor = await client.actor(ACTOR_ID).get();
@@ -208,9 +208,6 @@ export async function scrapeWithApify(
 
   const run = await client.task(task.id).call();
   const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-
-  // Clean up task after run (keep console tidy)
-  await client.task(task.id).delete();
 
   console.log(`  Task finished in ${duration}s, fetching results...`);
   const { items } = await client.dataset(run.defaultDatasetId).listItems();
