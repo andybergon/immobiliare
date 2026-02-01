@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface ImageCarouselProps {
   images: string[];
@@ -13,13 +13,29 @@ export function ImageCarousel({ images, title }: ImageCarouselProps) {
   const placeholderImage = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800";
   const displayImages = images.length > 0 ? images : [placeholderImage];
 
-  const goToPrevious = () => {
+  const goToPrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev === 0 ? displayImages.length - 1 : prev - 1));
-  };
+  }, [displayImages.length]);
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     setCurrentIndex((prev) => (prev === displayImages.length - 1 ? 0 : prev + 1));
-  };
+  }, [displayImages.length]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        goToPrevious();
+      } else if (e.key === "ArrowRight") {
+        goToNext();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [goToPrevious, goToNext]);
 
   return (
     <div className="relative aspect-video bg-slate-800">
