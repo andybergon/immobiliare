@@ -96,12 +96,21 @@ export default function ZoneMap() {
                 {zone.listingCount > 0 ? (
                   <Link
                     href={`/play/${zone.slug}`}
-                    className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                    style={{
+                      display: 'inline-block',
+                      padding: '8px 16px',
+                      backgroundColor: '#2563eb',
+                      color: 'white',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      textDecoration: 'none'
+                    }}
                   >
                     Gioca
                   </Link>
                 ) : (
-                  <span className="text-gray-400 text-sm">Nessun annuncio</span>
+                  <span style={{ color: '#9ca3af', fontSize: '14px' }}>Nessun annuncio</span>
                 )}
               </div>
             </Popup>
