@@ -64,23 +64,10 @@ export function ImageCarousel({ images, title }: ImageCarouselProps) {
           >
             →
           </button>
-
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-            {displayImages.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  index === currentIndex ? "bg-white" : "bg-white/50"
-                }`}
-                aria-label={`Vai alla foto ${index + 1}`}
-              />
-            ))}
-          </div>
         </>
       )}
 
-      <div className="absolute top-2 right-2 bg-black/50 px-2 py-1 rounded text-sm">
+      <div className="absolute top-2 right-2 bg-black/60 px-3 py-1 rounded-full text-sm font-medium">
         {currentIndex + 1} / {displayImages.length}
       </div>
     </div>
