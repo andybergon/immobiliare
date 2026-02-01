@@ -160,6 +160,94 @@ echo "APIFY_TOKEN=your_token_here" >> .env.local
 
 Get token at: https://console.apify.com/account/integrations (free tier = $5/month)
 
+## Immobiliare.it Mobile API
+
+The mobile app API (`ios-imm-v4.ws-app.com`) is publicly accessible without DataDome blocking. Used for getting listing counts without Apify costs.
+
+### Endpoints
+
+**1. URL Resolver** - Converts website URL to API parameters
+```
+GET https://ios-imm-v4.ws-app.com/b2c/v1/resolver/url?url={encoded_url}
+```
+
+Example:
+```bash
+curl "https://ios-imm-v4.ws-app.com/b2c/v1/resolver/url?url=https://www.immobiliare.it/vendita-case/roma/axa/"
+```
+
+Response:
+```json
+{
+  "type": "search",
+  "params": {
+    "z3": "10962",    // microzone ID
+    "cat": 1,         // category (1=vendita)
+    "t": "v",         // type (v=vendita)
+    "pr": "RM",       // province
+    "c": 6737,        // city ID (Roma)
+    "z2": "10259"     // macrozone ID
+  }
+}
+```
+
+**2. Properties Search** - Get listings with total count
+```
+GET https://ios-imm-v4.ws-app.com/b2c/v1/properties?{params}&start={offset}
+```
+
+Example:
+```bash
+curl "https://ios-imm-v4.ws-app.com/b2c/v1/properties?z3=10962&cat=1&t=v&pr=RM&c=6737&z2=10259&start=0"
+```
+
+Response:
+```json
+{
+  "totalActive": 121,    // <-- Total listings for this zone
+  "count": 20,           // Items per page
+  "list": [...],         // Listing summaries
+  "offset": 0
+}
+```
+
+### Zone Slug Mapping
+
+Our zone slugs must match immobiliare.it's URL structure. Some zones have different slugs:
+
+| Our Slug | Immobiliare Slug | Status |
+|----------|------------------|--------|
+| `axa` | `axa` | ✅ Works |
+| `trastevere` | `trastevere` | ✅ Works |
+| `monteverde` | `monteverde-nuovo` | ❌ Needs fix |
+| `monte-sacro` | ? | ❌ Not found |
+| `prenestino` | ? | ❌ Not found |
+
+**Zones needing slug fixes (16):**
+- Est: Prenestino, Tiburtino, Tuscolano
+- Nord: Monte Sacro, Nomentano, Salario, Talenti, Trieste
+- Ovest: Aurelio, Gianicolense, Monteverde, Primavalle, Trionfale
+- Sud: Ardeatino, Laurentino
+- Periferia: Tor Bella Monaca
+
+To fix, update `data/zones.json` with correct `slug` values after looking up on immobiliare.it.
+
+### Get Counts Script
+
+```bash
+# Get listing counts for all zones (free, instant)
+bun run jobs/collect-data/get-counts.ts
+
+# Filter by area
+bun run jobs/collect-data/get-counts.ts --area=litorale
+
+# Specific zones
+bun run jobs/collect-data/get-counts.ts --zones=axa,trastevere
+
+# JSON output
+bun run jobs/collect-data/get-counts.ts --json
+```
+
 ## App Routes
 
 - `/` - Home: choose Map or Arcade mode
