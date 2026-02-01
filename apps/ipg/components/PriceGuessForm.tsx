@@ -44,6 +44,7 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
               id="price-guess"
               type="text"
               inputMode="numeric"
+              autoComplete="off"
               value={thousands}
               onChange={handleChange}
               onFocus={() => setIsFocused(true)}
@@ -52,9 +53,8 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
               disabled={disabled}
               tabIndex={1}
               style={{ width: `${inputWidth}ch` }}
-              className="bg-transparent text-2xl focus:outline-none disabled:opacity-50 text-white"
-            />
-            <span className="text-slate-400 text-2xl">.000</span>
+              className="bg-transparent text-2xl focus:outline-none disabled:opacity-50 text-white text-right"
+            /><span className="text-slate-400 text-2xl">.000</span>
           </div>
           {!isFocused && !hasValue && <KeyboardHint keys="Tab" className="hidden sm:block" />}
         </div>
