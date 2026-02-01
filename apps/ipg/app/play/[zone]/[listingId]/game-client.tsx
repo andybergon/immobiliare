@@ -107,9 +107,15 @@ export function GameClient({ zone, listing, prevId, nextId, total, current }: Ga
                 href={listing.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 bg-slate-600 hover:bg-slate-500 text-white font-bold py-3 px-6 rounded-lg text-center transition-colors"
+                className="flex-1 bg-slate-600 hover:bg-slate-500 text-white font-bold py-3 px-6 rounded-lg text-center transition-colors flex items-center justify-center gap-2"
               >
-                Vedi annuncio
+                <img
+                  src="https://www.immobiliare.it/favicon.ico"
+                  alt=""
+                  className="w-5 h-5"
+                />
+                <span>Vedi annuncio</span>
+                <span className="text-sm">↗</span>
               </a>
               {nextId && (
                 <Link
