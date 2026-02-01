@@ -27,8 +27,8 @@ export default function Home() {
             href="/play/axa"
             className="block p-8 bg-slate-700 rounded-2xl hover:bg-slate-600 hover:scale-[1.02] transition-all text-center"
           >
-            <span className="text-6xl block mb-4">🎮</span>
-            <h3 className="text-2xl font-bold mb-2">Arcade</h3>
+            <span className="text-6xl block mb-4">🎲</span>
+            <h3 className="text-2xl font-bold mb-2">Casuale</h3>
             <p className="text-slate-300">
               Quartiere casuale, inizia subito
             </p>
