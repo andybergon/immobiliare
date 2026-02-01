@@ -6,7 +6,7 @@ interface KeyboardHintProps {
 export function KeyboardHint({ keys, className = "" }: KeyboardHintProps) {
   return (
     <kbd
-      className={`text-[10px] text-slate-400 bg-slate-700/80 px-1.5 py-0.5 rounded border border-slate-600 font-mono ${className}`}
+      className={`text-xs text-slate-300 bg-slate-700/80 px-2 py-1 rounded border border-slate-600 font-mono ${className}`}
     >
       {keys}
     </kbd>

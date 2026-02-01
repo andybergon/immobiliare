@@ -66,7 +66,7 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
           title="Premi Invio per confermare"
         >
           <span className="hidden sm:inline">Indovina</span>
-          <KeyboardHint keys="↵" className="bg-emerald-700 border-emerald-600 text-sm px-2 py-1" />
+          <KeyboardHint keys="↵" className="bg-emerald-700 border-emerald-600" />
         </button>
       </div>
     </form>
