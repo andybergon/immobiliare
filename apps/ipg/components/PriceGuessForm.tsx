@@ -12,10 +12,14 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
   const [thousands, setThousands] = useState("");
   const [isFocused, setIsFocused] = useState(false);
 
+  const formatWithDots = (num: number): string => {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/\D/g, "");
     if (raw.length <= 7) {
-      const formatted = raw ? parseInt(raw, 10).toLocaleString("it-IT") : "";
+      const formatted = raw ? formatWithDots(parseInt(raw, 10)) : "";
       setThousands(formatted);
     }
   };
@@ -53,7 +57,7 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
               disabled={disabled}
               tabIndex={1}
               style={{ width: `${inputWidth}ch` }}
-              className="bg-transparent text-2xl focus:outline-none disabled:opacity-50 text-white text-right"
+              className="bg-transparent text-2xl focus:outline-none disabled:opacity-50 text-white"
             /><span className="text-slate-400 text-2xl">.000</span>
           </div>
           {!isFocused && !hasValue && <KeyboardHint keys="Tab" className="hidden sm:block" />}
