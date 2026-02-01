@@ -148,11 +148,8 @@ ${allZones.map((z) => `  - ${z.slug} (${z.name}) [${z.area}]`).join("\n")}
   if (options.limit) console.log(`Limit: ${options.limit} per zone`);
   if (options.dryRun) console.log(`Mode: DRY RUN`);
 
-  for (const zone of zones) {
-    await collectZone(zone, options);
-    // Small delay between zones
-    await new Promise((r) => setTimeout(r, 1000));
-  }
+  // Run all zones in parallel
+  await Promise.all(zones.map((zone) => collectZone(zone, options)));
 
   console.log(`\n✨ Done!`);
 }

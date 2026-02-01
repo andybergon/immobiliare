@@ -192,7 +192,8 @@ export async function scrapeWithApify(
   };
 
   // Create a named task for visibility in Apify console
-  const taskName = `${zone.region}>${zone.city}>${zone.area}>${zone.slug}`;
+  // Use -- as separator (Apify only allows letters, digits, and single hyphens in middle)
+  const taskName = `${zone.region}--${zone.city}--${zone.area}--${zone.slug}`;
   console.log(`  Creating task: ${taskName}`);
 
   const actor = await client.actor(ACTOR_ID).get();

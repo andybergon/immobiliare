@@ -295,6 +295,34 @@ const { added, updated, unchanged } = await db.saveSnapshotDeduped(snapshot);
 - **Scraping**: Apify (memo23/immobiliare-scraper)
 - **Storage**: Local JSON
 
+## Gotchas
+
+### Apify Task Naming
+
+Apify task names only allow letters, digits, and hyphens (not at start/end). We use `--` as hierarchy separator:
+```
+lazio--roma--litorale--axa
+```
+
+This differentiates from slugs that contain single hyphens (e.g., `casal-palocco`).
+
+### Apify Free Tier Limit
+
+Free tier returns max 100 items regardless of `maxItems` setting. To get more coverage:
+- Sort by newest first (`?criterio=dataModifica&ordine=desc`) to always capture recent listings
+- Run scrapes periodically to build up historical data
+- Consider paid plan for full zone coverage
+
+### Direct HTTP Blocked (DataDome)
+
+Direct HTTP requests to `immobiliare.it` return 403 (DataDome protection). Use either:
+- **Apify actor** for full scraping (paid per result)
+- **Mobile API** (`ios-imm-v4.ws-app.com`) for free listing counts
+
+### Parallel Zone Scraping
+
+The collector runs zones in parallel using `Promise.all`. Apify handles concurrent tasks without rate limiting (tested with 8 concurrent zones). Console output may interleave but results are correct.
+
 ## Common Issues
 
 ### Hydration Errors from Browser Extensions
