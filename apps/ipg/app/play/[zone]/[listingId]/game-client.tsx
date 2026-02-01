@@ -63,31 +63,34 @@ export function GameClient({ zone, listing, prevId, nextId, total, current }: Ga
           {revealed ? "Risultato" : "Indovina il prezzo"}
         </h1>
 
-        <div className="mb-6 relative">
-          {prevId && (
-            <Link
-              href={`/play/${zone.slug}/${prevId}`}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 sm:-translate-x-14 z-10 flex flex-col items-center gap-1"
-              aria-label="Annuncio precedente"
-              title="Alt + ←"
-            >
-              <span className="bg-slate-800/80 hover:bg-slate-700 text-white p-3 rounded-full transition-colors shadow-lg">←</span>
-              <KeyboardHint keys="Alt ←" className="hidden sm:block" />
-            </Link>
-          )}
-
+        <div className="mb-6">
           <PropertyCard listing={listing} showPrice={revealed} />
 
-          {nextId && (
-            <Link
-              href={`/play/${zone.slug}/${nextId}`}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 sm:translate-x-14 z-10 flex flex-col items-center gap-1"
-              aria-label="Annuncio successivo"
-              title="Alt + →"
-            >
-              <span className="bg-slate-800/80 hover:bg-slate-700 text-white p-3 rounded-full transition-colors shadow-lg">→</span>
-              <KeyboardHint keys="Alt →" className="hidden sm:block" />
-            </Link>
+          {(prevId || nextId) && (
+            <div className="flex justify-center gap-4 mt-3">
+              {prevId ? (
+                <Link
+                  href={`/play/${zone.slug}/${prevId}`}
+                  className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
+                  title="Alt + ←"
+                >
+                  <span>← Precedente</span>
+                  <KeyboardHint keys="Alt ←" className="hidden sm:inline" />
+                </Link>
+              ) : (
+                <span />
+              )}
+              {nextId && (
+                <Link
+                  href={`/play/${zone.slug}/${nextId}`}
+                  className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
+                  title="Alt + →"
+                >
+                  <KeyboardHint keys="Alt →" className="hidden sm:inline" />
+                  <span>Successivo →</span>
+                </Link>
+              )}
+            </div>
           )}
         </div>
 

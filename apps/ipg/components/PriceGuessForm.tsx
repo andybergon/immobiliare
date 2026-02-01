@@ -33,40 +33,40 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="flex items-center gap-2 mb-2">
-        <label htmlFor="price-guess" className="text-lg">
-          Quanto costa questo immobile?
-        </label>
-        {!isFocused && <KeyboardHint keys="Tab" className="hidden sm:inline" />}
-      </div>
+      <label htmlFor="price-guess" className="block text-lg mb-2">
+        Quanto costa questo immobile?
+      </label>
       <div className="flex gap-2">
-        <div className="flex-1 bg-slate-600 rounded-lg flex items-center px-4 py-4">
-          <span className="text-slate-400 text-2xl mr-2">€</span>
-          <input
-            id="price-guess"
-            type="text"
-            inputMode="numeric"
-            value={thousands}
-            onChange={handleChange}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            placeholder="350"
-            disabled={disabled}
-            tabIndex={1}
-            style={{ width: `${inputWidth}ch` }}
-            className="bg-transparent text-2xl focus:outline-none disabled:opacity-50 text-white"
-          />
-          <span className="text-slate-400 text-2xl">.000</span>
+        <div className="flex-1 bg-slate-600 rounded-lg flex items-center justify-between px-4 py-4">
+          <div className="flex items-center">
+            <span className="text-slate-400 text-2xl mr-2">€</span>
+            <input
+              id="price-guess"
+              type="text"
+              inputMode="numeric"
+              value={thousands}
+              onChange={handleChange}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              placeholder="350"
+              disabled={disabled}
+              tabIndex={1}
+              style={{ width: `${inputWidth}ch` }}
+              className="bg-transparent text-2xl focus:outline-none disabled:opacity-50 text-white"
+            />
+            <span className="text-slate-400 text-2xl">.000</span>
+          </div>
+          {!isFocused && !hasValue && <KeyboardHint keys="Tab" className="hidden sm:block" />}
         </div>
         <button
           type="submit"
           disabled={disabled || !hasValue}
           tabIndex={2}
-          className="bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-bold px-6 rounded-lg transition-colors flex items-center gap-2"
+          className="bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-bold px-5 rounded-lg transition-colors flex items-center gap-2"
           title="Premi Invio per confermare"
         >
           <span className="hidden sm:inline">Indovina</span>
-          <KeyboardHint keys="↵" className="bg-emerald-700 border-emerald-600" />
+          <KeyboardHint keys="↵" className="bg-emerald-700 border-emerald-600 text-sm px-2 py-1" />
         </button>
       </div>
     </form>
