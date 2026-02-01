@@ -9,7 +9,6 @@ interface PriceGuessFormProps {
 
 export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormProps) {
   const [thousands, setThousands] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/\D/g, "");
@@ -27,7 +26,6 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
     }
   };
 
-  const displayValue = thousands ? `${thousands}.000` : "";
   const hasValue = thousands.length > 0;
 
   return (
@@ -36,28 +34,26 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
         Quanto costa questo immobile?
       </label>
       <div className="flex gap-2">
-        <div className="relative flex-1">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">€</span>
+        <div className="relative flex-1 bg-slate-600 rounded-lg flex items-center">
+          <span className="pl-4 text-slate-400 text-2xl">€</span>
           <input
             id="price-guess"
             type="text"
             inputMode="numeric"
             value={thousands}
             onChange={handleChange}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
             placeholder="350"
             disabled={disabled}
             autoFocus
-            className="w-full bg-slate-600 rounded-lg py-4 pl-12 pr-20 text-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
+            tabIndex={1}
+            className="bg-transparent py-4 px-2 text-2xl focus:outline-none disabled:opacity-50 w-24 sm:w-32"
           />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-2xl">
-            .000
-          </span>
+          <span className="text-slate-400 text-2xl">.000</span>
         </div>
         <button
           type="submit"
           disabled={disabled || !hasValue}
+          tabIndex={2}
           className="bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-bold px-6 rounded-lg transition-colors flex items-center gap-2"
           title="Premi Invio per confermare"
         >
