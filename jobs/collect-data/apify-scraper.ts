@@ -190,15 +190,29 @@ export async function scrapeWithApify(
     maxPages: options.maxPages || 20,
   };
 
-  console.log(`  Starting actor run (this may take 30-60 seconds)...`);
+  // Create a named task for visibility in Apify console
+  const taskName = `ipg-${zone.area}-${zone.slug}`;
+  console.log(`  Creating task: ${taskName}`);
+
+  const actor = await client.actor(ACTOR_ID).get();
+  if (!actor?.id) throw new Error("Could not get actor ID");
+
+  const task = await client.tasks().create({
+    actId: actor.id,
+    name: taskName,
+    input,
+  });
+
+  console.log(`  Running task (this may take 30-60 seconds)...`);
   const startTime = Date.now();
 
-  // Note: Apify runs can't be named via API - only "Saved Tasks" have names
-  // Runs are identified by timestamp + search URL in run details
-  const run = await client.actor(ACTOR_ID).call(input);
+  const run = await client.task(task.id).call();
   const duration = ((Date.now() - startTime) / 1000).toFixed(1);
 
-  console.log(`  Actor finished in ${duration}s, fetching results...`);
+  // Clean up task after run (keep console tidy)
+  await client.task(task.id).delete();
+
+  console.log(`  Task finished in ${duration}s, fetching results...`);
   const { items } = await client.dataset(run.defaultDatasetId).listItems();
 
   console.log(`  Processing ${items.length} raw results...`);
