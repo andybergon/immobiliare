@@ -20,6 +20,7 @@ export function PropertyCard({ listing, showPrice = false }: PropertyCardProps) 
             href={listing.url}
             target="_blank"
             rel="noopener noreferrer"
+            tabIndex={-1}
             className="text-slate-400 hover:text-emerald-400 text-sm whitespace-nowrap flex items-center gap-1 shrink-0"
           >
             ↗ immobiliare.it

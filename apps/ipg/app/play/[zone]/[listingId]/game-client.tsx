@@ -71,6 +71,7 @@ export function GameClient({ zone, listing, prevId, nextId, total, current }: Ga
               {prevId ? (
                 <Link
                   href={`/play/${zone.slug}/${prevId}`}
+                  tabIndex={-1}
                   className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
                   title="Alt + ←"
                 >
@@ -83,6 +84,7 @@ export function GameClient({ zone, listing, prevId, nextId, total, current }: Ga
               {nextId && (
                 <Link
                   href={`/play/${zone.slug}/${nextId}`}
+                  tabIndex={-1}
                   className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
                   title="Alt + →"
                 >
