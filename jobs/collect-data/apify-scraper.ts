@@ -192,7 +192,24 @@ export async function scrapeWithApify(
 
   console.log(`  Starting actor run (this may take 30-60 seconds)...`);
   const startTime = Date.now();
-  const run = await client.actor(ACTOR_ID).call(input);
+
+  // Start run with custom name for Apify console visibility
+  const runName = `ipg-${zone.area}-${zone.slug}`;
+  const run = await client.actor(ACTOR_ID).start(input);
+
+  // Update run name via API (shows in Apify console)
+  try {
+    await fetch(`https://api.apify.com/v2/actor-runs/${run.id}?token=${token}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: runName }),
+    });
+  } catch {
+    // Name update is optional, continue if it fails
+  }
+
+  // Wait for run to finish
+  await client.run(run.id).waitForFinish();
   const duration = ((Date.now() - startTime) / 1000).toFixed(1);
 
   console.log(`  Actor finished in ${duration}s, fetching results...`);
