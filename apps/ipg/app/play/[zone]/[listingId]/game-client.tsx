@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { Listing, Zone } from "@ipg/db";
 import { PropertyCard } from "@/components/PropertyCard";
@@ -18,6 +19,7 @@ interface GameClientProps {
 }
 
 export function GameClient({ zone, listing, prevId, nextId, total, current }: GameClientProps) {
+  const router = useRouter();
   const [guess, setGuess] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
 
@@ -25,6 +27,21 @@ export function GameClient({ zone, listing, prevId, nextId, total, current }: Ga
     setGuess(value);
     setRevealed(true);
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && e.key === "ArrowLeft" && prevId) {
+        e.preventDefault();
+        router.push(`/play/${zone.slug}/${prevId}`);
+      } else if (e.altKey && e.key === "ArrowRight" && nextId) {
+        e.preventDefault();
+        router.push(`/play/${zone.slug}/${nextId}`);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [router, zone.slug, prevId, nextId]);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 text-white p-4 sm:p-8">
