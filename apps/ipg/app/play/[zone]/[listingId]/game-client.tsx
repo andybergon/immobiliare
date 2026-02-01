@@ -109,11 +109,9 @@ export function GameClient({ zone, listing, prevId, nextId, total, current }: Ga
                 rel="noopener noreferrer"
                 className="flex-1 bg-slate-600 hover:bg-slate-500 text-white font-bold py-3 px-6 rounded-lg text-center transition-colors flex items-center justify-center gap-2"
               >
-                <img
-                  src="https://www.immobiliare.it/favicon.ico"
-                  alt=""
-                  className="w-5 h-5"
-                />
+                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+                  <path d="M12 3L2 12h3v9h6v-6h2v6h6v-9h3L12 3z" />
+                </svg>
                 <span>Vedi annuncio</span>
                 <span className="text-sm">↗</span>
               </a>
