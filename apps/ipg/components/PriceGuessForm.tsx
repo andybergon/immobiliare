@@ -28,14 +28,16 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
 
   const hasValue = thousands.length > 0;
 
+  const inputWidth = Math.max(3, thousands.length + 1);
+
   return (
     <form onSubmit={handleSubmit}>
       <label htmlFor="price-guess" className="block text-lg mb-2">
         Quanto costa questo immobile?
       </label>
       <div className="flex gap-2">
-        <div className="relative flex-1 bg-slate-600 rounded-lg flex items-center">
-          <span className="pl-4 text-slate-400 text-2xl">€</span>
+        <div className="flex-1 bg-slate-600 rounded-lg flex items-center px-4 py-4">
+          <span className="text-slate-400 text-2xl mr-2">€</span>
           <input
             id="price-guess"
             type="text"
@@ -46,7 +48,8 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
             disabled={disabled}
             autoFocus
             tabIndex={1}
-            className="bg-transparent py-4 px-2 text-2xl focus:outline-none disabled:opacity-50 w-24 sm:w-32"
+            style={{ width: `${inputWidth}ch` }}
+            className="bg-transparent text-2xl focus:outline-none disabled:opacity-50 text-white"
           />
           <span className="text-slate-400 text-2xl">.000</span>
         </div>
