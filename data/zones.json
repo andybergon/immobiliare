@@ -1,0 +1,35 @@
+[
+  {
+    "id": "lazio-roma-axa",
+    "name": "Axa",
+    "slug": "axa",
+    "region": "lazio",
+    "province": "roma",
+    "city": "roma",
+    "immobiliareParams": {
+      "idQuartiere": "10962"
+    }
+  },
+  {
+    "id": "lazio-roma-casal-palocco",
+    "name": "Casal Palocco",
+    "slug": "casal-palocco",
+    "region": "lazio",
+    "province": "roma",
+    "city": "roma",
+    "immobiliareParams": {
+      "idQuartiere": "10259"
+    }
+  },
+  {
+    "id": "lazio-roma-infernetto",
+    "name": "Infernetto",
+    "slug": "infernetto",
+    "region": "lazio",
+    "province": "roma",
+    "city": "roma",
+    "immobiliareParams": {
+      "idQuartiere": "12721"
+    }
+  }
+]
