@@ -62,7 +62,7 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
               tabIndex={1}
               style={{ fieldSizing: "content" } as React.CSSProperties}
               className="bg-transparent text-2xl focus:outline-none disabled:opacity-50 text-white"
-            /><span className="text-slate-400 text-2xl -ml-1">.000</span>
+            /><span className="text-slate-400 text-2xl">.000</span>
           </div>
           {!isFocused && !hasValue && <KeyboardHint keys="Tab" className="hidden sm:block" />}
         </div>

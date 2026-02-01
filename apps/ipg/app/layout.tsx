@@ -12,8 +12,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const isDev = process.env.NODE_ENV === "development";
+
 export const metadata: Metadata = {
-  title: "Il Prezzo Giusto",
+  title: isDev ? "[DEV] Il Prezzo Giusto" : "Il Prezzo Giusto",
   description: "Indovina il prezzo degli immobili a Roma",
 };
 
