@@ -6,6 +6,7 @@ import type { Listing, Zone } from "@ipg/db";
 import { PropertyCard } from "@/components/PropertyCard";
 import { PriceGuessForm } from "@/components/PriceGuessForm";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 interface GameClientProps {
   zone: Zone;
@@ -29,9 +30,12 @@ export function GameClient({ zone, listing, prevId, nextId, total, current }: Ga
     <main className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 text-white p-4 sm:p-8">
       <div className="max-w-2xl mx-auto">
         <div className="mb-6 flex items-center justify-between">
-          <Link href="/map" className="text-slate-400 hover:text-white">
-            ← {zone.name}
-          </Link>
+          <Breadcrumbs
+            items={[
+              { label: "Mappa", href: "/map" },
+              { label: zone.name },
+            ]}
+          />
           <span className="text-slate-400 text-sm">
             {current} / {total}
           </span>

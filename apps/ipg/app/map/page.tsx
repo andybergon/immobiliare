@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const ZoneMap = dynamic(() => import("@/components/ZoneMap"), {
   ssr: false,
@@ -16,14 +16,9 @@ export default function MapPage() {
   return (
     <main className="min-h-screen flex flex-col items-center bg-gradient-to-b from-slate-900 to-slate-800 text-white p-8">
       <div className="max-w-4xl w-full">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">Zone di Roma</h1>
-          <Link
-            href="/"
-            className="text-slate-400 hover:text-white transition-colors"
-          >
-            ← Torna alla home
-          </Link>
+        <div className="mb-6">
+          <Breadcrumbs items={[{ label: "Mappa" }]} />
+          <h1 className="text-3xl font-bold mt-4">Zone di Roma</h1>
         </div>
 
         <p className="text-slate-300 mb-6">
