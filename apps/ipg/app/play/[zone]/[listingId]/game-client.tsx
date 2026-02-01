@@ -37,12 +37,18 @@ export function GameClient({ zone, listing, prevId, nextId, total, current }: Ga
       } else if (e.altKey && e.key === "ArrowRight" && nextId) {
         e.preventDefault();
         router.push(`/play/${zone.slug}/${nextId}`);
+      } else if (e.key === "Enter" && revealed && nextId) {
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+          return;
+        }
+        e.preventDefault();
+        router.push(`/play/${zone.slug}/${nextId}`);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [router, zone.slug, prevId, nextId]);
+  }, [router, zone.slug, prevId, nextId, revealed]);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 text-white p-4 sm:p-8">
@@ -64,7 +70,7 @@ export function GameClient({ zone, listing, prevId, nextId, total, current }: Ga
         </h1>
 
         <div className="mb-6">
-          <PropertyCard listing={listing} showPrice={revealed} />
+          <PropertyCard listing={listing} />
 
           {(prevId || nextId) && (
             <div className="flex justify-center gap-4 mt-3">
@@ -104,28 +110,17 @@ export function GameClient({ zone, listing, prevId, nextId, total, current }: Ga
               <ScoreDisplay guess={guess} actual={listing.price} />
             )}
 
-            <div className="flex gap-4 mt-6">
-              <a
-                href={listing.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 bg-slate-600 hover:bg-slate-500 text-white font-bold py-3 px-6 rounded-lg text-center transition-colors flex items-center justify-center gap-2"
-              >
-                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-                  <path d="M12 3L2 12h3v9h6v-6h2v6h6v-9h3L12 3z" />
-                </svg>
-                <span>Vedi annuncio</span>
-                <span className="text-sm">↗</span>
-              </a>
-              {nextId && (
+            {nextId && (
+              <div className="mt-6">
                 <Link
                   href={`/play/${zone.slug}/${nextId}`}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-lg text-center transition-colors"
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
-                  Prossimo →
+                  <span>Prossimo →</span>
+                  <KeyboardHint keys="↵" className="bg-emerald-700 border-emerald-600" />
                 </Link>
-              )}
-            </div>
+              </div>
+            )}
           </>
         )}
       </div>

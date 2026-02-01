@@ -53,7 +53,7 @@ export function ImageCarousel({ images, title }: ImageCarouselProps) {
           <button
             onClick={goToPrevious}
             tabIndex={-1}
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/70 hover:bg-black/90 text-white p-3 rounded-full transition-colors text-lg"
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/90 hover:bg-black text-white p-3 rounded-full transition-colors text-lg"
             aria-label="Foto precedente"
           >
             ←
@@ -61,7 +61,7 @@ export function ImageCarousel({ images, title }: ImageCarouselProps) {
           <button
             onClick={goToNext}
             tabIndex={-1}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/70 hover:bg-black/90 text-white p-3 rounded-full transition-colors text-lg"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/90 hover:bg-black text-white p-3 rounded-full transition-colors text-lg"
             aria-label="Foto successiva"
           >
             →

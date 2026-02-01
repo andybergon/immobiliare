@@ -23,7 +23,11 @@ export function PropertyCard({ listing, showPrice = false }: PropertyCardProps) 
             tabIndex={-1}
             className="text-slate-400 hover:text-emerald-400 text-sm whitespace-nowrap flex items-center gap-1 shrink-0"
           >
-            ↗ immobiliare.it
+            <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+              <path d="M12 3L2 12h3v9h6v-6h2v6h6v-9h3L12 3z" />
+            </svg>
+            <span>immobiliare.it</span>
+            <span>↗</span>
           </a>
         </div>
 

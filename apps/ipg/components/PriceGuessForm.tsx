@@ -33,7 +33,6 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
   };
 
   const hasValue = thousands.length > 0;
-  const inputWidth = Math.max(3, thousands.length + 1);
 
   return (
     <form onSubmit={handleSubmit}>
@@ -42,7 +41,7 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
       </label>
       <div className="flex gap-2">
         <div className="flex-1 bg-slate-600 rounded-lg flex items-center justify-between px-4 py-4">
-          <div className="flex items-center">
+          <div className="inline-flex items-center">
             <span className="text-slate-400 text-2xl mr-2">€</span>
             <input
               id="price-guess"
@@ -53,12 +52,17 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
               onChange={handleChange}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  e.currentTarget.blur();
+                }
+              }}
               placeholder="350"
               disabled={disabled}
               tabIndex={1}
-              style={{ width: `${inputWidth}ch` }}
+              style={{ fieldSizing: "content" } as React.CSSProperties}
               className="bg-transparent text-2xl focus:outline-none disabled:opacity-50 text-white"
-            /><span className="text-slate-400 text-2xl">.000</span>
+            /><span className="text-slate-400 text-2xl -ml-1">.000</span>
           </div>
           {!isFocused && !hasValue && <KeyboardHint keys="Tab" className="hidden sm:block" />}
         </div>

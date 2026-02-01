@@ -26,28 +26,23 @@ function calculateScore(guess: number, actual: number): { score: number; percent
 }
 
 export function ScoreDisplay({ guess, actual }: ScoreDisplayProps) {
-  const { score, percentOff, message } = calculateScore(guess, actual);
+  const { percentOff } = calculateScore(guess, actual);
   const isOver = guess > actual;
 
   return (
-    <div className="space-y-6">
-      <div className="bg-slate-700 rounded-lg p-6 text-center">
-        <p className="text-slate-400 mb-2">Il prezzo reale è</p>
-        <p className="text-4xl font-bold text-emerald-400">{formatPrice(actual)}</p>
-      </div>
-
-      <div className="bg-slate-700 rounded-lg p-6 text-center">
-        <p className="text-slate-400 mb-2">La tua stima</p>
-        <p className="text-2xl font-semibold">{formatPrice(guess)}</p>
-        <p className="text-slate-400 mt-2">
-          {isOver ? "↑" : "↓"} {percentOff.toFixed(1)}% {isOver ? "sopra" : "sotto"}
-        </p>
-      </div>
-
-      <div className="bg-slate-700 rounded-lg p-6 text-center">
-        <p className="text-6xl mb-2">{message}</p>
-        <p className="text-slate-400">Punteggio</p>
-        <p className="text-5xl font-bold">{score}</p>
+    <div className="bg-slate-700 rounded-lg p-6">
+      <div className="grid grid-cols-2 gap-4 text-center">
+        <div>
+          <p className="text-slate-400 text-sm mb-2">Il prezzo reale</p>
+          <p className="text-3xl font-bold text-emerald-400">{formatPrice(actual)}</p>
+        </div>
+        <div>
+          <p className="text-slate-400 text-sm mb-2">La tua stima</p>
+          <p className="text-3xl font-semibold">{formatPrice(guess)}</p>
+          <p className="text-slate-400 text-sm mt-2">
+            {isOver ? "↑" : "↓"} {percentOff.toFixed(1)}% {isOver ? "sopra" : "sotto"}
+          </p>
+        </div>
       </div>
     </div>
   );
