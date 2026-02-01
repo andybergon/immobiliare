@@ -28,6 +28,7 @@ export interface Listing {
   description?: string;
   price: number;
   priceFormatted: string;
+  previousPrice?: number;
   images: string[];
   location: ListingLocation;
   features: ListingFeatures;
@@ -35,21 +36,27 @@ export interface Listing {
   scrapedAt: string;
 }
 
+/**
+ * Zone hierarchy: region > city > area > zone
+ * Example: lazio > roma > litorale > axa
+ */
 export interface Zone {
   id: string;
   name: string;
   slug: string;
   region: string;
-  province: string;
   city: string;
-  immobiliareParams?: {
-    idZona?: string;
-    idQuartiere?: string;
+  area: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
   };
-  idealistaParams?: {
-    locationId?: string;
-    locationUri?: string;
-  };
+}
+
+export interface SnapshotMetadata {
+  requestedLimit?: number;
+  returnedCount?: number;
+  hitLimit?: boolean;
 }
 
 export interface Snapshot {
@@ -58,6 +65,7 @@ export interface Snapshot {
   source: "immobiliare" | "idealista";
   listingCount: number;
   listings: Listing[];
+  metadata?: SnapshotMetadata;
 }
 
 export interface DB {
@@ -69,7 +77,7 @@ export interface DB {
   getRandomListing(zoneId: string): Promise<Listing | null>;
   getRandomListings(zoneId: string, count: number): Promise<Listing[]>;
 
-  getZones(region?: string): Promise<Zone[]>;
+  getZones(area?: string): Promise<Zone[]>;
   getZone(zoneId: string): Promise<Zone | null>;
   saveZones(zones: Zone[]): Promise<void>;
 }

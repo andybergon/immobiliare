@@ -1,35 +1,618 @@
-[
-  {
-    "id": "lazio-roma-axa",
-    "name": "Axa",
-    "slug": "axa",
-    "region": "lazio",
-    "province": "roma",
-    "city": "roma",
-    "immobiliareParams": {
-      "idQuartiere": "10962"
+{
+  "version": 1,
+  "updatedAt": "2026-02-01",
+  "zones": [
+    {
+      "id": "roma-centro-storico",
+      "name": "Centro Storico",
+      "slug": "centro-storico",
+      "area": "centro",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8986,
+        "lng": 12.4769
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-trastevere",
+      "name": "Trastevere",
+      "slug": "trastevere",
+      "area": "centro",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8833,
+        "lng": 12.4667
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-testaccio",
+      "name": "Testaccio",
+      "slug": "testaccio",
+      "area": "centro",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8750,
+        "lng": 12.4750
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-san-lorenzo",
+      "name": "San Lorenzo",
+      "slug": "san-lorenzo",
+      "area": "centro",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8983,
+        "lng": 12.5150
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-esquilino",
+      "name": "Esquilino",
+      "slug": "esquilino",
+      "area": "centro",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8942,
+        "lng": 12.5050
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-parioli",
+      "name": "Parioli",
+      "slug": "parioli",
+      "area": "nord",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.9250,
+        "lng": 12.4900
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-flaminio",
+      "name": "Flaminio",
+      "slug": "flaminio",
+      "area": "nord",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.9283,
+        "lng": 12.4717
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-trieste",
+      "name": "Trieste",
+      "slug": "trieste",
+      "area": "nord",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.9200,
+        "lng": 12.5100
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-prati",
+      "name": "Prati",
+      "slug": "prati",
+      "area": "nord",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.9100,
+        "lng": 12.4600
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-nomentano",
+      "name": "Nomentano",
+      "slug": "nomentano",
+      "area": "nord",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.9117,
+        "lng": 12.5183
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-talenti",
+      "name": "Talenti",
+      "slug": "talenti",
+      "area": "nord",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.9500,
+        "lng": 12.5500
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-monte-sacro",
+      "name": "Monte Sacro",
+      "slug": "monte-sacro",
+      "area": "nord",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.9450,
+        "lng": 12.5300
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-vigna-clara",
+      "name": "Vigna Clara",
+      "slug": "vigna-clara",
+      "area": "nord",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.9400,
+        "lng": 12.4650
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-fleming",
+      "name": "Fleming",
+      "slug": "fleming",
+      "area": "nord",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.9350,
+        "lng": 12.4550
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-salario",
+      "name": "Salario",
+      "slug": "salario",
+      "area": "nord",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.9133,
+        "lng": 12.4983
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-eur",
+      "name": "EUR",
+      "slug": "eur",
+      "area": "sud",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8300,
+        "lng": 12.4650
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-garbatella",
+      "name": "Garbatella",
+      "slug": "garbatella",
+      "area": "sud",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8617,
+        "lng": 12.4867
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-ostiense",
+      "name": "Ostiense",
+      "slug": "ostiense",
+      "area": "sud",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8700,
+        "lng": 12.4800
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-san-paolo",
+      "name": "San Paolo",
+      "slug": "san-paolo",
+      "area": "sud",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8583,
+        "lng": 12.4767
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-marconi",
+      "name": "Marconi",
+      "slug": "marconi",
+      "area": "sud",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8517,
+        "lng": 12.4700
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-torrino",
+      "name": "Torrino",
+      "slug": "torrino",
+      "area": "sud",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8100,
+        "lng": 12.4550
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-laurentino",
+      "name": "Laurentino",
+      "slug": "laurentino",
+      "area": "sud",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8200,
+        "lng": 12.4850
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-ardeatino",
+      "name": "Ardeatino",
+      "slug": "ardeatino",
+      "area": "sud",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8450,
+        "lng": 12.5000
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-san-giovanni",
+      "name": "San Giovanni",
+      "slug": "san-giovanni",
+      "area": "est",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8850,
+        "lng": 12.5100
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-appio-latino",
+      "name": "Appio Latino",
+      "slug": "appio-latino",
+      "area": "est",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8750,
+        "lng": 12.5150
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-tuscolano",
+      "name": "Tuscolano",
+      "slug": "tuscolano",
+      "area": "est",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8700,
+        "lng": 12.5300
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-cinecitta",
+      "name": "Cinecittà",
+      "slug": "cinecitta",
+      "area": "est",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8550,
+        "lng": 12.5650
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-centocelle",
+      "name": "Centocelle",
+      "slug": "centocelle",
+      "area": "est",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8750,
+        "lng": 12.5600
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-prenestino",
+      "name": "Prenestino",
+      "slug": "prenestino",
+      "area": "est",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8900,
+        "lng": 12.5400
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-torpignattara",
+      "name": "Torpignattara",
+      "slug": "torpignattara",
+      "area": "est",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8817,
+        "lng": 12.5350
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-tiburtino",
+      "name": "Tiburtino",
+      "slug": "tiburtino",
+      "area": "est",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.9050,
+        "lng": 12.5500
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-pietralata",
+      "name": "Pietralata",
+      "slug": "pietralata",
+      "area": "est",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.9150,
+        "lng": 12.5450
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-monteverde",
+      "name": "Monteverde",
+      "slug": "monteverde",
+      "area": "ovest",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8700,
+        "lng": 12.4500
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-aurelio",
+      "name": "Aurelio",
+      "slug": "aurelio",
+      "area": "ovest",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8950,
+        "lng": 12.4300
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-balduina",
+      "name": "Balduina",
+      "slug": "balduina",
+      "area": "ovest",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.9150,
+        "lng": 12.4350
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-trionfale",
+      "name": "Trionfale",
+      "slug": "trionfale",
+      "area": "ovest",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.9200,
+        "lng": 12.4450
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-primavalle",
+      "name": "Primavalle",
+      "slug": "primavalle",
+      "area": "ovest",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.9300,
+        "lng": 12.4200
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-boccea",
+      "name": "Boccea",
+      "slug": "boccea",
+      "area": "ovest",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.9050,
+        "lng": 12.4050
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-gianicolense",
+      "name": "Gianicolense",
+      "slug": "gianicolense",
+      "area": "ovest",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8750,
+        "lng": 12.4400
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-axa",
+      "name": "Axa",
+      "slug": "axa",
+      "area": "litorale",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.7283,
+        "lng": 12.3456
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-casal-palocco",
+      "name": "Casal Palocco",
+      "slug": "casal-palocco",
+      "area": "litorale",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.7450,
+        "lng": 12.3650
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-infernetto",
+      "name": "Infernetto",
+      "slug": "infernetto",
+      "area": "litorale",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.7350,
+        "lng": 12.3300
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-ostia-antica",
+      "name": "Ostia Antica",
+      "slug": "ostia-antica",
+      "area": "litorale",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.7558,
+        "lng": 12.2917
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-ostia-levante",
+      "name": "Ostia Levante",
+      "slug": "ostia-levante",
+      "area": "litorale",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.7350,
+        "lng": 12.2950
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-ostia-ponente",
+      "name": "Ostia Ponente",
+      "slug": "ostia-ponente",
+      "area": "litorale",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.7280,
+        "lng": 12.2650
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-lido-di-ostia",
+      "name": "Lido di Ostia",
+      "slug": "lido-di-ostia-castel-fusano",
+      "area": "litorale",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.7300,
+        "lng": 12.2800
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-acilia",
+      "name": "Acilia",
+      "slug": "acilia",
+      "area": "litorale",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.7567,
+        "lng": 12.3517
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-porta-di-roma",
+      "name": "Porta di Roma",
+      "slug": "porta-di-roma",
+      "area": "periferia",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.9700,
+        "lng": 12.5550
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-bufalotta",
+      "name": "Bufalotta",
+      "slug": "bufalotta",
+      "area": "periferia",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.9650,
+        "lng": 12.5400
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-tor-bella-monaca",
+      "name": "Tor Bella Monaca",
+      "slug": "tor-bella-monaca",
+      "area": "periferia",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8750,
+        "lng": 12.6200
+      },
+      "region": "lazio"
+    },
+    {
+      "id": "roma-torre-angela",
+      "name": "Torre Angela",
+      "slug": "torre-angela",
+      "area": "periferia",
+      "city": "roma",
+      "coordinates": {
+        "lat": 41.8650,
+        "lng": 12.6000
+      },
+      "region": "lazio"
     }
-  },
-  {
-    "id": "lazio-roma-casal-palocco",
-    "name": "Casal Palocco",
-    "slug": "casal-palocco",
-    "region": "lazio",
-    "province": "roma",
-    "city": "roma",
-    "immobiliareParams": {
-      "idQuartiere": "10259"
-    }
-  },
-  {
-    "id": "lazio-roma-infernetto",
-    "name": "Infernetto",
-    "slug": "infernetto",
-    "region": "lazio",
-    "province": "roma",
-    "city": "roma",
-    "immobiliareParams": {
-      "idQuartiere": "12721"
-    }
-  }
-]
+  ]
+}

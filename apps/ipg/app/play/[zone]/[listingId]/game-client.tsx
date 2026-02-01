@@ -10,9 +10,13 @@ import { ScoreDisplay } from "@/components/ScoreDisplay";
 interface GameClientProps {
   zone: Zone;
   listing: Listing;
+  prevId: string | null;
+  nextId: string | null;
+  total: number;
+  current: number;
 }
 
-export function GameClient({ zone, listing }: GameClientProps) {
+export function GameClient({ zone, listing, prevId, nextId, total, current }: GameClientProps) {
   const [guess, setGuess] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
 
@@ -24,12 +28,12 @@ export function GameClient({ zone, listing }: GameClientProps) {
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 text-white p-4 sm:p-8">
       <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <Link href={`/${zone.region}`} className="text-slate-400 hover:text-white">
+        <div className="mb-6 flex items-center justify-between">
+          <Link href="/map" className="text-slate-400 hover:text-white">
             ← {zone.name}
           </Link>
-          <span className="text-slate-500 text-sm">
-            {zone.city.charAt(0).toUpperCase() + zone.city.slice(1)}
+          <span className="text-slate-400 text-sm">
+            {current} / {total}
           </span>
         </div>
 
@@ -37,8 +41,28 @@ export function GameClient({ zone, listing }: GameClientProps) {
           {revealed ? "Risultato" : "Indovina il prezzo"}
         </h1>
 
-        <div className="mb-6">
+        <div className="mb-6 relative">
+          {prevId && (
+            <Link
+              href={`/play/${zone.slug}/${prevId}`}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 sm:-translate-x-14 z-10 bg-slate-800/80 hover:bg-slate-700 text-white p-3 rounded-full transition-colors shadow-lg"
+              aria-label="Annuncio precedente"
+            >
+              ←
+            </Link>
+          )}
+
           <PropertyCard listing={listing} showPrice={revealed} />
+
+          {nextId && (
+            <Link
+              href={`/play/${zone.slug}/${nextId}`}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 sm:translate-x-14 z-10 bg-slate-800/80 hover:bg-slate-700 text-white p-3 rounded-full transition-colors shadow-lg"
+              aria-label="Annuncio successivo"
+            >
+              →
+            </Link>
+          )}
         </div>
 
         {!revealed ? (
@@ -58,12 +82,14 @@ export function GameClient({ zone, listing }: GameClientProps) {
               >
                 Vedi annuncio
               </a>
-              <Link
-                href={`/play/${zone.slug}`}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-lg text-center transition-colors"
-              >
-                Prossimo →
-              </Link>
+              {nextId && (
+                <Link
+                  href={`/play/${zone.slug}/${nextId}`}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-lg text-center transition-colors"
+                >
+                  Prossimo →
+                </Link>
+              )}
             </div>
           </>
         )}

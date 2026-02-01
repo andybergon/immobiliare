@@ -1,5 +1,5 @@
-import { LocalDB, type Listing, type Zone } from "@ipg/db";
-import { GameClient } from "./game-client";
+import { LocalDB, type Zone } from "@ipg/db";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { resolve } from "path";
 
@@ -13,9 +13,10 @@ async function getZoneBySlug(slug: string): Promise<Zone | null> {
   return zones.find((z) => z.slug === slug) || null;
 }
 
-async function getRandomListing(zoneId: string): Promise<Listing | null> {
+async function getRandomListingId(zoneId: string): Promise<string | null> {
   const db = new LocalDB({ dataDir: DATA_DIR });
-  return db.getRandomListing(zoneId);
+  const listing = await db.getRandomListing(zoneId);
+  return listing?.sourceId || null;
 }
 
 interface PageProps {
@@ -41,9 +42,9 @@ export default async function PlayZonePage({ params }: PageProps) {
     );
   }
 
-  const listing = await getRandomListing(zone.id);
+  const listingId = await getRandomListingId(zone.id);
 
-  if (!listing) {
+  if (!listingId) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-slate-900 to-slate-800 text-white p-8">
         <h1 className="text-3xl font-bold mb-4">{zone.name}</h1>
@@ -58,5 +59,5 @@ export default async function PlayZonePage({ params }: PageProps) {
     );
   }
 
-  return <GameClient zone={zone} listing={listing} />;
+  redirect(`/play/${zoneSlug}/${listingId}`);
 }

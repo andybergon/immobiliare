@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import type { Listing } from "@ipg/db";
 import { ImageCarousel } from "./ImageCarousel";
 
@@ -15,7 +14,17 @@ export function PropertyCard({ listing, showPrice = false }: PropertyCardProps) 
       <ImageCarousel images={listing.images} title={listing.title} />
 
       <div className="p-4 space-y-4">
-        <h2 className="text-xl font-semibold">{listing.title}</h2>
+        <div className="flex items-start justify-between gap-4">
+          <h2 className="text-xl font-semibold">{listing.title}</h2>
+          <a
+            href={listing.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-slate-400 hover:text-emerald-400 text-sm whitespace-nowrap flex items-center gap-1 shrink-0"
+          >
+            ↗ immobiliare.it
+          </a>
+        </div>
 
         {listing.location.address && (
           <div className="flex items-center gap-2 text-slate-300">

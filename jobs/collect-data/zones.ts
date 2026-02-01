@@ -1,100 +1,43 @@
 import type { Zone } from "@ipg/db";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 
-export const ROME_ZONES: Zone[] = [
-  {
-    id: "lazio-roma-axa",
-    name: "Axa",
-    slug: "axa",
-    region: "lazio",
-    province: "roma",
-    city: "roma",
-    immobiliareParams: {
-      idQuartiere: "10962",
-    },
-  },
-  {
-    id: "lazio-roma-casal-palocco",
-    name: "Casal Palocco",
-    slug: "casal-palocco",
-    region: "lazio",
-    province: "roma",
-    city: "roma",
-    immobiliareParams: {
-      idQuartiere: "10259",
-    },
-  },
-  {
-    id: "lazio-roma-infernetto",
-    name: "Infernetto",
-    slug: "infernetto",
-    region: "lazio",
-    province: "roma",
-    city: "roma",
-    immobiliareParams: {
-      idQuartiere: "12721",
-    },
-  },
-  {
-    id: "lazio-roma-ostia",
-    name: "Ostia",
-    slug: "ostia",
-    region: "lazio",
-    province: "roma",
-    city: "roma",
-    immobiliareParams: {
-      idMZona: "10259",
-    },
-  },
-  {
-    id: "lazio-roma-acilia",
-    name: "Acilia",
-    slug: "acilia",
-    region: "lazio",
-    province: "roma",
-    city: "roma",
-    immobiliareParams: {
-      idQuartiere: "10081",
-    },
-  },
-  {
-    id: "lazio-roma-trastevere",
-    name: "Trastevere",
-    slug: "trastevere",
-    region: "lazio",
-    province: "roma",
-    city: "roma",
-    immobiliareParams: {
-      idQuartiere: "11217",
-    },
-  },
-  {
-    id: "lazio-roma-testaccio",
-    name: "Testaccio",
-    slug: "testaccio",
-    region: "lazio",
-    province: "roma",
-    city: "roma",
-    immobiliareParams: {
-      idQuartiere: "11213",
-    },
-  },
-  {
-    id: "lazio-roma-prati",
-    name: "Prati",
-    slug: "prati",
-    region: "lazio",
-    province: "roma",
-    city: "roma",
-    immobiliareParams: {
-      idQuartiere: "11112",
-    },
-  },
-];
+const ZONES_FILE = resolve(import.meta.dirname, "../../data/zones.json");
 
-export function getZonesBySlug(slugs: string[]): Zone[] {
-  return ROME_ZONES.filter((z) => slugs.includes(z.slug));
+interface ZonesConfig {
+  version: number;
+  updatedAt: string;
+  zones: Zone[];
+}
+
+let _zonesCache: Zone[] | null = null;
+
+function loadZones(): Zone[] {
+  if (_zonesCache) return _zonesCache;
+
+  const content = readFileSync(ZONES_FILE, "utf-8");
+  const config: ZonesConfig = JSON.parse(content);
+  _zonesCache = config.zones;
+  return _zonesCache;
 }
 
 export function getAllZones(): Zone[] {
-  return ROME_ZONES;
+  return loadZones();
+}
+
+export function getZonesBySlug(slugs: string[]): Zone[] {
+  return loadZones().filter((z) => slugs.includes(z.slug));
+}
+
+export function getZoneBySlug(slug: string): Zone | undefined {
+  return loadZones().find((z) => z.slug === slug);
+}
+
+export function getZonesByArea(area: string): Zone[] {
+  return loadZones().filter((z) => z.area === area);
+}
+
+export function getAreas(): string[] {
+  const zones = loadZones();
+  return [...new Set(zones.map((z) => z.area))];
 }
