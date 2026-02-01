@@ -54,7 +54,8 @@ interface ApifyListingResult {
 }
 
 function buildSearchUrl(zone: Zone): string {
-  return `https://www.immobiliare.it/vendita-case/${zone.city}/${zone.slug}/`;
+  // Sort by newest first so we always get the most recent listings
+  return `https://www.immobiliare.it/vendita-case/${zone.city}/${zone.slug}/?criterio=dataModifica&ordine=desc`;
 }
 
 function parseNumber(value: string | number | undefined | null): number | null {
