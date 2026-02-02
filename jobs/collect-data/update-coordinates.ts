@@ -23,7 +23,7 @@ interface ZonesFile {
   zones: ZoneConfig[];
 }
 
-async function getZoneCoordinates(zone: ZoneConfig): Promise<{ lat: number; lng: number } | null> {
+async function getZoneCoordinates(zone: ZoneConfig): Promise<{ lat: number; lng: number; count: number } | null> {
   const params = new URLSearchParams({
     c: "6737",
     cat: "1",
@@ -40,23 +40,44 @@ async function getZoneCoordinates(zone: ZoneConfig): Promise<{ lat: number; lng:
   }
 
   try {
-    const response = await fetch(`${PROPERTIES_URL}?${params}&start=0`, {
+    // First request to get total count
+    const firstResponse = await fetch(`${PROPERTIES_URL}?${params}&start=0`, {
       headers: { "User-Agent": "Mozilla/5.0" },
     });
-    if (!response.ok) return null;
+    if (!firstResponse.ok) return null;
 
-    const data = await response.json();
-    const listings = data.list || [];
+    const firstData = await firstResponse.json();
+    const total = firstData.totalActive || 0;
+    if (total === 0) return null;
 
-    if (listings.length === 0) return null;
-
-    // Get coordinates from first 10 listings and average them
+    // Collect coordinates from all listings
     const coords: { lat: number; lng: number }[] = [];
-    for (const listing of listings.slice(0, 10)) {
+
+    // Add from first page
+    for (const listing of firstData.list || []) {
       const geo = listing.geography?.geolocation;
       if (geo?.latitude && geo?.longitude) {
         coords.push({ lat: geo.latitude, lng: geo.longitude });
       }
+    }
+
+    // Fetch remaining pages
+    const pageSize = 20;
+    for (let offset = pageSize; offset < total; offset += pageSize) {
+      const response = await fetch(`${PROPERTIES_URL}?${params}&start=${offset}`, {
+        headers: { "User-Agent": "Mozilla/5.0" },
+      });
+      if (!response.ok) break;
+
+      const data = await response.json();
+      for (const listing of data.list || []) {
+        const geo = listing.geography?.geolocation;
+        if (geo?.latitude && geo?.longitude) {
+          coords.push({ lat: geo.latitude, lng: geo.longitude });
+        }
+      }
+
+      await new Promise(r => setTimeout(r, 50));
     }
 
     if (coords.length === 0) return null;
@@ -67,6 +88,7 @@ async function getZoneCoordinates(zone: ZoneConfig): Promise<{ lat: number; lng:
     return {
       lat: Math.round(avgLat * 10000) / 10000,
       lng: Math.round(avgLng * 10000) / 10000,
+      count: coords.length,
     };
   } catch {
     return null;
@@ -91,11 +113,11 @@ async function main() {
       const lngDiff = Math.abs(newCoords.lng - oldCoords.lng);
 
       if (latDiff > 0.005 || lngDiff > 0.005) {
-        console.log(`✅ ${zone.name}: (${oldCoords.lat}, ${oldCoords.lng}) → (${newCoords.lat}, ${newCoords.lng})`);
-        zone.coordinates = newCoords;
+        console.log(`✅ ${zone.name}: (${oldCoords.lat}, ${oldCoords.lng}) → (${newCoords.lat}, ${newCoords.lng}) [${newCoords.count} listings]`);
+        zone.coordinates = { lat: newCoords.lat, lng: newCoords.lng };
         updated++;
       } else {
-        console.log(`  ${zone.name}: OK (diff < 0.005)`);
+        console.log(`  ${zone.name}: OK [${newCoords.count} listings]`);
       }
     } else {
       console.log(`❌ ${zone.name}: failed to get coordinates`);

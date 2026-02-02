@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import type { Listing, Zone } from "@ipg/db";
+import type { Listing, Zone } from "@ipg/db/client";
 import { PropertyCard } from "@/components/PropertyCard";
 import { PriceGuessForm } from "@/components/PriceGuessForm";
 import { ScoreDisplay } from "@/components/ScoreDisplay";

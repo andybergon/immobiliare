@@ -1,7 +1,7 @@
 import { readFile, writeFile, mkdir, readdir } from "fs/promises";
 import { existsSync } from "fs";
 import { join, dirname } from "path";
-import type { DB, Listing, Snapshot, Zone } from "./types.js";
+import type { DB, Listing, Snapshot, Zone, CompactListing, CompactSnapshot } from "./types.js";
 
 export interface LocalDBOptions {
   dataDir: string;
@@ -29,6 +29,60 @@ export class LocalDB implements DB {
     this.dataDir = options.dataDir;
     this.listingsDir = join(this.dataDir, "listings");
     this.zonesFile = join(this.dataDir, "zones.json");
+  }
+
+  /**
+   * Hydrate a compact listing into a full listing
+   */
+  private hydrateListing(
+    compact: CompactListing,
+    source: "immobiliare" | "idealista",
+    zone: Zone,
+    scrapedAt: string
+  ): Listing {
+    const sourceId = compact.sourceId;
+    return {
+      id: `${source}-${sourceId}`,
+      source,
+      sourceId,
+      title: compact.title,
+      price: compact.price,
+      priceFormatted: `€ ${compact.price.toLocaleString("it-IT")}`,
+      previousPrice: compact.previousPrice,
+      images: compact.images,
+      location: {
+        region: zone.region,
+        province: zone.city === "roma" ? "Roma" : zone.city,
+        city: zone.city,
+        zone: zone.name,
+        zoneId: zone.id,
+      },
+      features: compact.features,
+      url: source === "immobiliare"
+        ? `https://www.immobiliare.it/annunci/${sourceId}/`
+        : `https://www.idealista.it/immobile/${sourceId}/`,
+      scrapedAt,
+    };
+  }
+
+  /**
+   * Convert a compact snapshot to a full snapshot
+   */
+  private hydrateSnapshot(compact: CompactSnapshot, zone: Zone): Snapshot {
+    return {
+      ...compact,
+      listings: compact.listings.map((l) =>
+        this.hydrateListing(l, compact.source, zone, compact.scrapedAt)
+      ),
+    };
+  }
+
+  /**
+   * Check if a listing is in compact format (missing full fields)
+   */
+  private isCompactListing(listing: unknown): listing is CompactListing {
+    const l = listing as Record<string, unknown>;
+    return l.sourceId !== undefined && l.id === undefined && l.url === undefined;
   }
 
   private async ensureDir(dir: string): Promise<void> {
@@ -78,21 +132,44 @@ export class LocalDB implements DB {
     return this.getListingPath(zone, source);
   }
 
+  /**
+   * Compact a full listing for storage
+   */
+  private compactListing(listing: Listing): CompactListing {
+    return {
+      sourceId: listing.sourceId,
+      title: listing.title,
+      price: listing.price,
+      ...(listing.previousPrice && { previousPrice: listing.previousPrice }),
+      images: listing.images,
+      features: listing.features,
+    };
+  }
+
   async saveSnapshot(snapshot: Snapshot): Promise<void> {
     const zone = await this.getZoneById(snapshot.zoneId);
     if (!zone) {
       throw new Error(`Zone not found: ${snapshot.zoneId}`);
     }
 
+    // Save in compact format
+    const compact: CompactSnapshot = {
+      zoneId: snapshot.zoneId,
+      scrapedAt: snapshot.scrapedAt,
+      source: snapshot.source,
+      listingCount: snapshot.listingCount,
+      listings: snapshot.listings.map((l) => this.compactListing(l)),
+      metadata: snapshot.metadata,
+    };
+
     const path = this.getListingPath(zone, snapshot.source);
     await this.ensureDir(dirname(path));
-    await writeFile(path, JSON.stringify(snapshot, null, 2));
+    await writeFile(path, JSON.stringify(compact, null, 2));
   }
 
   async getSnapshots(zoneId: string): Promise<Snapshot[]> {
     const snapshots: Snapshot[] = [];
 
-    // Try hierarchical path first
     const zone = await this.getZoneById(zoneId);
     if (zone) {
       for (const source of ["immobiliare", "idealista"] as const) {
@@ -100,35 +177,17 @@ export class LocalDB implements DB {
         if (existsSync(path)) {
           try {
             const content = await readFile(path, "utf-8");
-            snapshots.push(JSON.parse(content));
+            const parsed = JSON.parse(content);
+            // Hydrate if compact format
+            if (parsed.listings?.length > 0 && this.isCompactListing(parsed.listings[0])) {
+              snapshots.push(this.hydrateSnapshot(parsed as CompactSnapshot, zone));
+            } else {
+              snapshots.push(parsed);
+            }
           } catch {
             // Skip invalid files
           }
         }
-      }
-    }
-
-    // Also check legacy flat structure for backwards compatibility
-    const legacyDir = join(this.dataDir, "snapshots");
-    if (existsSync(legacyDir)) {
-      try {
-        const dateDirs = await readdir(legacyDir);
-        for (const dateDir of dateDirs) {
-          const dirPath = join(legacyDir, dateDir);
-          try {
-            const files = await readdir(dirPath);
-            for (const file of files) {
-              if (file.startsWith(zoneId) && file.endsWith(".json")) {
-                const content = await readFile(join(dirPath, file), "utf-8");
-                snapshots.push(JSON.parse(content));
-              }
-            }
-          } catch {
-            continue;
-          }
-        }
-      } catch {
-        // Legacy dir doesn't exist or not readable
       }
     }
 

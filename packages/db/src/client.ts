@@ -1,14 +1,10 @@
-export { LocalDB } from "./local.js";
-export type { LocalDBOptions } from "./local.js";
+// Client-safe exports (no fs/node dependencies)
 export type {
-  DB,
   Listing,
   ListingLocation,
   ListingFeatures,
   Snapshot,
   Zone,
-  CompactListing,
-  CompactSnapshot,
 } from "./types.js";
 
 export type { ImageSize } from "./images.js";

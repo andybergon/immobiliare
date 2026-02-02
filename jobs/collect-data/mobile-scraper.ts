@@ -1,4 +1,5 @@
 import type { Listing, Zone } from "@ipg/db";
+import { extractImageId } from "@ipg/db/client";
 
 const RESOLVER_URL = "https://ios-imm-v4.ws-app.com/b2c/v1/resolver/url";
 const PROPERTIES_URL = "https://ios-imm-v4.ws-app.com/b2c/v1/properties";
@@ -80,16 +81,17 @@ function parseNumber(value: string | number | undefined | null): number | null {
 }
 
 function extractImages(property: MobileApiProperty): string[] {
-  const images: string[] = [];
+  const imageIds: string[] = [];
   if (property.media?.images) {
     for (const img of property.media.images) {
       const url = img?.hd || img?.sd;
       if (url && !url.includes("placeholder") && !url.includes("data:image")) {
-        images.push(url);
+        const id = extractImageId(url);
+        if (id) imageIds.push(id);
       }
     }
   }
-  return images;
+  return imageIds;
 }
 
 function normalizeMobileApiResult(property: MobileApiProperty, zone: Zone): Listing | null {

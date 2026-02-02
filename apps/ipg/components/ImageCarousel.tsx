@@ -1,6 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import {
+  buildImageUrl,
+  type ImageSize,
+  IMAGE_SIZE_MOBILE,
+  IMAGE_SIZE_DESKTOP,
+} from "@ipg/db/client";
 
 interface ImageCarouselProps {
   images: string[];
@@ -8,15 +14,49 @@ interface ImageCarouselProps {
 }
 
 const LOADER_DELAY_MS = 150;
+const IMAGE_SIZES: ImageSize[] = ["xs", "s", "m", "l", "xl", "xxl"];
+
+function isImageId(value: string): boolean {
+  return /^\d+$/.test(value);
+}
+
+function getImageUrl(imageOrId: string, size: ImageSize): string {
+  if (isImageId(imageOrId)) {
+    return buildImageUrl(imageOrId, size);
+  }
+  return imageOrId.replace(/\/(xs|s|m|m-c|l|xl|xxl)\.jpg$/, `/${size}.jpg`);
+}
+
+const isDev = process.env.NODE_ENV === "development";
+const MOBILE_BREAKPOINT = 768;
+
+function getResponsiveSize(): ImageSize {
+  if (typeof window === "undefined") return IMAGE_SIZE_DESKTOP;
+  return window.innerWidth < MOBILE_BREAKPOINT ? IMAGE_SIZE_MOBILE : IMAGE_SIZE_DESKTOP;
+}
 
 export function ImageCarousel({ images, title }: ImageCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loadedIndex, setLoadedIndex] = useState(0);
   const [showLoader, setShowLoader] = useState(false);
+  const [imageSize, setImageSize] = useState<ImageSize>(IMAGE_SIZE_DESKTOP);
+  const [showSizeMenu, setShowSizeMenu] = useState(false);
+  const [manualSize, setManualSize] = useState(false);
   const loaderTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useEffect(() => {
+    if (manualSize) return;
+    setImageSize(getResponsiveSize());
+    const handleResize = () => setImageSize(getResponsiveSize());
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [manualSize]);
+
   const placeholderImage = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800";
-  const displayImages = images.length > 0 ? images : [placeholderImage];
+  const rawImages = images.length > 0 ? images : [placeholderImage];
+  const displayImages = rawImages.map((img) =>
+    img.includes("unsplash") ? img : getImageUrl(img, imageSize)
+  );
 
   const goToPrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev === 0 ? displayImages.length - 1 : prev - 1));
@@ -124,8 +164,41 @@ export function ImageCarousel({ images, title }: ImageCarouselProps) {
         </>
       )}
 
-      <div className="absolute top-2 right-2 bg-black/60 px-3 py-1 rounded-full text-sm font-medium">
-        {currentIndex + 1} / {displayImages.length}
+      <div className="absolute top-2 right-2 flex items-center gap-2">
+        {isDev && (
+          <div className="relative">
+            <button
+              onClick={() => setShowSizeMenu((v) => !v)}
+              className="bg-black/60 hover:bg-black/80 p-1.5 rounded-full transition-colors"
+              aria-label="Image size"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </button>
+            {showSizeMenu && (
+              <div className="absolute top-full right-0 mt-1 bg-black/90 rounded-lg overflow-hidden shadow-lg">
+                {IMAGE_SIZES.map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => {
+                      setImageSize(size);
+                      setManualSize(true);
+                      setShowSizeMenu(false);
+                    }}
+                    className={`block w-full px-3 py-1.5 text-sm text-left hover:bg-white/20 ${size === imageSize ? "bg-white/30 font-bold" : ""}`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        <div className="bg-black/60 px-3 py-1 rounded-full text-sm font-medium">
+          {currentIndex + 1} / {displayImages.length}
+        </div>
       </div>
     </div>
   );

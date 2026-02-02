@@ -7,6 +7,26 @@ export interface ListingLocation {
   address?: string;
 }
 
+/** Compact listing format for storage (minimal fields) */
+export interface CompactListing {
+  sourceId: string;
+  title: string;
+  price: number;
+  previousPrice?: number;
+  images: string[];
+  features: ListingFeatures;
+}
+
+/** Compact snapshot format for storage */
+export interface CompactSnapshot {
+  zoneId: string;
+  scrapedAt: string;
+  source: "immobiliare" | "idealista";
+  listingCount: number;
+  listings: CompactListing[];
+  metadata?: SnapshotMetadata;
+}
+
 export interface ListingFeatures {
   area: number | null;
   rooms: number | null;
