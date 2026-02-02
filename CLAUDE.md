@@ -34,15 +34,15 @@ Turborepo + Bun monorepo for a real estate price guessing game using Rome listin
 
 ### Zone Hierarchy
 
-Zones follow a 4-level hierarchy: **region > city > area > zone**
+**Our hierarchy:** region > city > area > zone (e.g., `lazio/roma/litorale/axa`)
 
-Example path: `lazio/roma/litorale/axa`
+**Immobiliare.it hierarchy:** pr (province) > c (city) > z2 (macrozone) > z3 (microzone)
 
 ```json
 // data/zones.json
 {
   "version": 1,
-  "updatedAt": "2026-02-01",
+  "updatedAt": "2026-02-02",
   "zones": [
     {
       "id": "roma-axa",
@@ -51,7 +51,9 @@ Example path: `lazio/roma/litorale/axa`
       "region": "lazio",
       "city": "roma",
       "area": "litorale",
-      "coordinates": { "lat": 41.7283, "lng": 12.3456 }
+      "coordinates": { "lat": 41.7283, "lng": 12.3456 },
+      "immobiliareZ2": 10259,  // Macrozone: "Axa, Casal Palocco, Infernetto"
+      "immobiliareZ3": 10962   // Microzone: "Axa" (specific)
     }
   ]
 }
@@ -226,26 +228,64 @@ Response:
 }
 ```
 
-### Zone Slug Mapping
+### Immobiliare.it Zone Hierarchy
 
-Our zone slugs must match immobiliare.it's URL structure. Some zones have different slugs:
+Immobiliare.it organizes Rome into a geographic hierarchy:
 
-| Our Slug | Immobiliare Slug | Status |
-|----------|------------------|--------|
-| `axa` | `axa` | ✅ Works |
-| `trastevere` | `trastevere` | ✅ Works |
-| `monteverde` | `monteverde-nuovo` | ❌ Needs fix |
-| `monte-sacro` | ? | ❌ Not found |
-| `prenestino` | ? | ❌ Not found |
+```
+pr (Province)     → "RM" (Roma)
+c  (City)         → 6737 (Roma city)
+z2 (Macrozone)    → Broad areas grouping multiple neighborhoods
+z3 (Microzone)    → Specific neighborhoods
+```
 
-**Zones needing slug fixes (16):**
-- Est: Prenestino, Tiburtino, Tuscolano
-- Nord: Monte Sacro, Nomentano, Salario, Talenti, Trieste
-- Ovest: Aurelio, Gianicolense, Monteverde, Primavalle, Trionfale
-- Sud: Ardeatino, Laurentino
-- Periferia: Tor Bella Monaca
+**z1 and z4 do not exist** (tested - z1 seems unused, z4 has no effect).
 
-To fix, update `data/zones.json` with correct `slug` values after looking up on immobiliare.it.
+#### Examples
+
+| Our Zone | z2 (Macrozone) | z3 (Microzone) |
+|----------|----------------|----------------|
+| axa | 10259 "Axa, Casal Palocco, Infernetto" | 10962 "Axa" |
+| casal-palocco | 10259 (same) | 12721 "Casal Palocco" |
+| infernetto | 10259 (same) | 10964 "Infernetto" |
+| lido-di-ostia | 10181 "Lido di Ostia, Ostia Antica, Castel Fusano" | ❌ none |
+| centro-storico | 10303 "Centro Storico" | ❌ none (has many microzones) |
+| trieste | 10147 "Salario, Trieste" | 12719 "Trieste - Coppedè" |
+
+#### Zone Data in zones.json
+
+Each zone has both IDs for flexible querying:
+
+```json
+{
+  "id": "roma-axa",
+  "name": "Axa",
+  "slug": "axa",
+  "immobiliareZ2": 10259,  // Macrozone (broader)
+  "immobiliareZ3": 10962   // Microzone (specific)
+}
+```
+
+The scraper uses z3 when available (more precise), falls back to z2 (broader area).
+
+#### The Lido di Ostia Problem
+
+"Lido di Ostia" is a z2-only zone (no z3). When queried:
+- z2=10181 returns ~1000 listings from ALL microzones in that macrozone
+- This includes Ostia Antica, Ostia Levante, Ostia Ponente (which we also scrape separately)
+- **Result:** Duplicate listings in our database
+
+This is intentional - storing both z2 and z3 lets us decide later how to group/display them.
+
+#### Discovering Zone IDs
+
+```bash
+# Get all zones by sampling properties
+bun run jobs/collect-data/get-all-zones.ts
+
+# Test specific zone IDs
+curl "https://ios-imm-v4.ws-app.com/b2c/v1/properties?c=6737&cat=1&t=v&pr=RM&z3=10962&start=0"
+```
 
 ### Get Counts Script
 
@@ -326,6 +366,10 @@ const { added, updated, unchanged } = await db.saveSnapshotDeduped(snapshot);
 - **Storage**: Local JSON
 
 ## Gotchas
+
+### Image Overlay Contrast
+
+Real estate photos are typically bright/light backgrounds. All UI elements overlaid on images (arrows, spinners, counters, badges) must use dark colors with high opacity (e.g., `bg-black/90`, `border-black`) to ensure visibility. Avoid white or low-opacity overlays.
 
 ### Apify Task Naming (if using --scraper=apify)
 

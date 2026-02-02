@@ -70,7 +70,7 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
                   formRef.current?.focus();
                 }
               }}
-              placeholder="350"
+              placeholder="xxx"
               disabled={disabled}
               style={{ fieldSizing: "content" } as React.CSSProperties}
               className="bg-transparent text-2xl focus:outline-none disabled:opacity-50 text-white"
