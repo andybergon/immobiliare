@@ -67,14 +67,15 @@ Turborepo + Bun monorepo for a real estate price guessing game using Rome listin
 ```typescript
 interface Listing {
   id: string;              // "immobiliare-123456"
-  source: "immobiliare";
+  source: "immobiliare" | "idealista";
   sourceId: string;        // "123456"
   title: string;
+  description?: string;
   price: number;
   priceFormatted: string;  // "€ 450.000"
   previousPrice?: number;  // Set when price changes
-  images: string[];
-  location: { city, zone, zoneId, address? };
+  images: string[];        // immobiliare: image ids ("1701951660"), not full URLs
+  location: { region, province, city, zone, zoneId, address? };
   features: { area, rooms, bedrooms, bathrooms, floor, ... };
   url: string;
   scrapedAt: string;
@@ -87,14 +88,39 @@ interface Listing {
 interface Snapshot {
   zoneId: string;
   scrapedAt: string;
-  source: "immobiliare";
+  source: "immobiliare" | "idealista";
   listingCount: number;
   listings: Listing[];
   metadata?: {
-    requestedLimit: number;   // e.g., 1000
-    returnedCount: number;    // e.g., 1000
-    hitLimit: boolean;        // true = may have missed listings
+    requestedLimit?: number;   // e.g., 1000
+    returnedCount?: number;    // e.g., 1000
+    hitLimit?: boolean;        // true = may have missed listings
   };
+}
+```
+
+### Compact Snapshot (On Disk)
+
+In `data/listings/**/{source}.json` we store a compact representation to reduce duplication and repo size.
+`LocalDB` hydrates this back into full `Listing`/`Snapshot` objects at runtime.
+
+```typescript
+interface CompactListing {
+  sourceId: string;
+  title: string;
+  price: number;
+  previousPrice?: number;
+  images: string[];      // immobiliare: image ids
+  features: Listing["features"];
+}
+
+interface CompactSnapshot {
+  zoneId: string;
+  scrapedAt: string;
+  source: "immobiliare" | "idealista";
+  listingCount: number;
+  listings: CompactListing[];
+  metadata?: Snapshot["metadata"];
 }
 ```
 
@@ -131,7 +157,9 @@ Example:
 data/listings/lazio/roma/litorale/axa/immobiliare.json
 ```
 
-Each source file contains a `Snapshot` with all listings for that zone from that source. This structure:
+Each source file contains a `CompactSnapshot` (minimal fields) for that zone/source.
+The database layer (`@ipg/db`) hydrates compact data into full `Listing` objects when reading.
+This structure:
 - Keeps data organized by geography
 - Supports multiple sources (immobiliare, idealista) per zone
 - Makes it easy to browse/debug data manually
@@ -342,7 +370,8 @@ The price input has smart formatting rules to make entering prices quick:
     "area": "litorale",
     "lat": 41.7283,
     "lng": 12.3456,
-    "listingCount": 100
+    "listingCount": 100,
+    "macrozone": "Axa, Casal Palocco, Infernetto"
   }
 ]
 ```
@@ -359,6 +388,13 @@ const listings = await db.getListings("roma-axa");
 const playable = await db.getListings("roma-axa", { playableOnly: true });  // Exclude price=0
 const zones = await db.getZones("litorale");  // Filter by area
 const { added, updated, unchanged } = await db.saveSnapshotDeduped(snapshot);
+```
+
+For Next.js client components, import types/helpers from `@ipg/db/client` (no Node/fs deps):
+
+```typescript
+import type { Listing, Zone } from "@ipg/db/client";
+import { buildImageUrl, IMAGE_SIZE_MOBILE } from "@ipg/db/client";
 ```
 
 **Note:** Listings with `price: 0` ("Prezzo su richiesta") are stored in the DB but filtered out for the game using `playableOnly: true`. Admin views show all listings.
