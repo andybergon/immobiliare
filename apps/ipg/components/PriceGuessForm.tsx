@@ -1,7 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { KeyboardHint } from "./KeyboardHint";
+import {
+  formatInputValue,
+  getSuffixZeros,
+  getValue,
+  parseInput,
+} from "@/lib/price-input";
 
 interface PriceGuessFormProps {
   onSubmit: (guess: number) => void;
@@ -9,30 +15,31 @@ interface PriceGuessFormProps {
 }
 
 export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormProps) {
-  const [thousands, setThousands] = useState("");
+  const [rawValue, setRawValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
-
-  const formatWithDots = (num: number): string => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  };
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/\D/g, "");
-    if (raw.length <= 7) {
-      const formatted = raw ? formatWithDots(parseInt(raw, 10)) : "";
-      setThousands(formatted);
+    const raw = parseInput(e.target.value);
+    if (raw.length <= 9) {
+      setRawValue(raw);
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const numericValue = parseInt(thousands.replace(/\D/g, ""), 10) * 1000;
-    if (!isNaN(numericValue) && numericValue > 0) {
+    const numericValue = getValue(rawValue);
+    if (numericValue > 0) {
       onSubmit(numericValue);
     }
   };
 
-  const hasValue = thousands.length > 0;
+  const handleContainerClick = () => {
+    inputRef.current?.focus();
+  };
+
+  const hasValue = rawValue.length > 0;
+  const suffix = getSuffixZeros(rawValue);
 
   return (
     <form onSubmit={handleSubmit}>
@@ -40,15 +47,19 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
         Quanto costa questo immobile?
       </label>
       <div className="flex gap-2">
-        <div className="flex-1 bg-slate-600 rounded-lg flex items-center justify-between px-4 py-4">
+        <div
+          className="flex-1 bg-slate-600 rounded-lg flex items-center justify-between px-4 py-4 cursor-text"
+          onClick={handleContainerClick}
+        >
           <div className="inline-flex items-center">
             <span className="text-slate-400 text-2xl mr-2">€</span>
             <input
+              ref={inputRef}
               id="price-guess"
               type="text"
               inputMode="numeric"
               autoComplete="off"
-              value={thousands}
+              value={formatInputValue(rawValue)}
               onChange={handleChange}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
@@ -62,7 +73,7 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
               tabIndex={1}
               style={{ fieldSizing: "content" } as React.CSSProperties}
               className="bg-transparent text-2xl focus:outline-none disabled:opacity-50 text-white"
-            /><span className="text-slate-400 text-2xl">.000</span>
+            /><span className="text-slate-400 text-2xl">{suffix}</span>
           </div>
           {!isFocused && !hasValue && <KeyboardHint keys="Tab" className="hidden sm:block" />}
         </div>
@@ -70,11 +81,11 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
           type="submit"
           disabled={disabled || !hasValue}
           tabIndex={2}
-          className="bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-bold px-5 rounded-lg transition-colors flex items-center gap-2"
+          className="bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-bold py-3 px-4 sm:px-5 rounded-lg transition-colors flex items-center justify-center gap-2"
           title="Premi Invio per confermare"
         >
-          <span className="hidden sm:inline">Indovina</span>
-          <KeyboardHint keys="↵" className="bg-emerald-700 border-emerald-600" />
+          <span>Indovina</span>
+          <KeyboardHint keys="↵" className="hidden sm:flex bg-emerald-700 border-emerald-600" />
         </button>
       </div>
     </form>

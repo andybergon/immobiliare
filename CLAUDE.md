@@ -17,7 +17,7 @@ Turborepo + Bun monorepo for a real estate price guessing game using Rome listin
 ├── packages/
 │   └── db/                       # @ipg/db - Database abstraction
 ├── jobs/
-│   └── collect-data/             # Apify-based data collection
+│   └── collect-data/             # Data collection (mobile API or Apify)
 ├── data/
 │   ├── zones.json                # Zone definitions (source of truth)
 │   └── listings/                 # Hierarchical listing storage
@@ -102,13 +102,14 @@ bun install              # Install all dependencies
 bun run build            # Build all packages
 bun run dev              # Dev mode (all packages)
 
-# Data collection (requires APIFY_TOKEN in .env.local)
+# Data collection (mobile API is default, free, and recommended)
 bun run jobs/collect-data                              # Show help
-bun run jobs/collect-data -- --zones=axa               # Scrape Axa
+bun run jobs/collect-data -- --zones=axa               # Scrape Axa (mobile API)
 bun run jobs/collect-data -- --zones=axa,trastevere    # Multiple zones
 bun run jobs/collect-data -- --area=litorale           # All litorale zones
 bun run jobs/collect-data -- --all                     # All 51 zones
 bun run jobs/collect-data -- --zones=axa --limit=500   # Custom limit
+bun run jobs/collect-data -- --scraper=apify           # Use Apify instead (paid)
 bun run jobs/collect-data -- --dry-run                 # Preview only
 ```
 
@@ -135,34 +136,48 @@ The database layer (`@ipg/db`) handles path resolution automatically using zone 
 
 ## Data Collection
 
-Uses Apify actor `memo23/immobiliare-scraper` (~$0.70/1000 listings, no rental required).
+Two scrapers available:
 
-**Defaults:**
-- `maxItems`: 1000 per zone
-- `maxPages`: 20
+### Mobile API Scraper (Default, Recommended)
 
-**Deduplication:**
+Uses the immobiliare.it mobile app API (`ios-imm-v4.ws-app.com`). **Free, fast, no API key required.**
+
+- Paginates through all listings (20 per page)
+- Returns structured JSON with all listing fields
+- No rate limiting observed
+- No limit on results
+
+```bash
+bun run jobs/collect-data -- --zones=axa              # Uses mobile API by default
+bun run jobs/collect-data -- --scraper=mobile         # Explicit
+```
+
+### Apify Scraper (Fallback)
+
+Uses Apify actor `memo23/immobiliare-scraper` (~$0.70/1000 listings). Requires `APIFY_TOKEN`.
+
+```bash
+bun run jobs/collect-data -- --zones=axa --scraper=apify
+bun run jobs/collect-data -- --zones=axa --scraper=apify --max-pages=10
+```
+
+**Apify Setup:**
+```bash
+echo "APIFY_TOKEN=your_token_here" >> .env.local
+```
+Get token at: https://console.apify.com/account/integrations (free tier = $5/month)
+
+### Deduplication
+
+Both scrapers use the same deduplication logic:
 - Compares new listings against existing snapshots
 - Only saves NEW or CHANGED listings
 - Tracks `previousPrice` when price changes
 - Logs: `✅ Added 50 new, updated 3 changed (947 unchanged)`
 
-**Metadata:**
-- `hitLimit: true` in snapshot metadata means the zone may have more listings than scraped
-- Check zones with high listing counts (e.g., Ostia areas have 500-1000+ each)
-
-### Environment Setup
-
-```bash
-# One-time: add Apify token to .env.local
-echo "APIFY_TOKEN=your_token_here" >> .env.local
-```
-
-Get token at: https://console.apify.com/account/integrations (free tier = $5/month)
-
 ## Immobiliare.it Mobile API
 
-The mobile app API (`ios-imm-v4.ws-app.com`) is publicly accessible without DataDome blocking. Used for getting listing counts without Apify costs.
+The mobile app API (`ios-imm-v4.ws-app.com`) is publicly accessible without DataDome blocking. **This is now the default scraper** - it returns full listing data, not just counts.
 
 ### Endpoints
 
@@ -255,6 +270,21 @@ bun run jobs/collect-data/get-counts.ts --json
 - `/play/{zone}` - Redirects to random listing in zone
 - `/play/{zone}/{listingId}` - Game for specific listing (stable URL)
 
+## Price Input
+
+The price input has smart formatting rules to make entering prices quick:
+
+| Digits Typed | Display | Value | Example |
+|--------------|---------|-------|---------|
+| 1-3 | XXX.000 | ×1000 | "350" → €350,000 |
+| 4-6 | XXX.YYY | Replace zeros | "3505" → €350,500 |
+| 7-9 | X.XXX.XXX | Full number | "1500000" → €1,500,000 |
+
+- Max 9 digits (up to €999,999,999)
+- Grayed placeholder zeros disappear as you fill digits 4-6
+- For 7+ digits, standard thousand-separator formatting applies
+- Logic extracted to `apps/ipg/lib/price-input.ts` with unit tests
+
 ## API
 
 - `GET /api/zones` - Returns all zones with listing counts
@@ -292,12 +322,12 @@ const { added, updated, unchanged } = await db.saveSnapshotDeduped(snapshot);
 - **Monorepo**: Turborepo
 - **Frontend**: Next.js 16, React 19, Tailwind CSS 4
 - **Map**: React-Leaflet
-- **Scraping**: Apify (memo23/immobiliare-scraper)
+- **Scraping**: Mobile API (default) or Apify (fallback)
 - **Storage**: Local JSON
 
 ## Gotchas
 
-### Apify Task Naming
+### Apify Task Naming (if using --scraper=apify)
 
 Apify task names only allow letters, digits, and hyphens (not at start/end). We use `--` as hierarchy separator:
 ```
@@ -306,18 +336,15 @@ lazio--roma--litorale--axa
 
 This differentiates from slugs that contain single hyphens (e.g., `casal-palocco`).
 
-### Apify Free Tier Limit
+### Apify Free Tier Limit (if using --scraper=apify)
 
-Free tier returns max 100 items regardless of `maxItems` setting. To get more coverage:
-- Sort by newest first (`?criterio=dataModifica&ordine=desc`) to always capture recent listings
-- Run scrapes periodically to build up historical data
-- Consider paid plan for full zone coverage
+Free tier returns max 100 items regardless of `maxItems` setting. The mobile API scraper has no such limit and is recommended instead.
 
 ### Direct HTTP Blocked (DataDome)
 
-Direct HTTP requests to `immobiliare.it` return 403 (DataDome protection). Use either:
-- **Apify actor** for full scraping (paid per result)
-- **Mobile API** (`ios-imm-v4.ws-app.com`) for free listing counts
+Direct HTTP requests to `immobiliare.it` website return 403 (DataDome protection). Use either:
+- **Mobile API** (`ios-imm-v4.ws-app.com`) - free, full listing data (recommended)
+- **Apify actor** - paid per result, fallback option
 
 ### Parallel Zone Scraping
 
