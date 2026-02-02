@@ -43,7 +43,7 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
   const suffix = getSuffixZeros(rawValue);
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} tabIndex={-1}>
+    <form ref={formRef} onSubmit={handleSubmit} tabIndex={-1} className="focus:outline-none">
       <label htmlFor="price-guess" className="block text-lg mb-2">
         Quanto costa questo immobile?
       </label>
@@ -66,6 +66,7 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
               onBlur={() => setIsFocused(false)}
               onKeyDown={(e) => {
                 if (e.key === "Escape") {
+                  inputRef.current?.blur();
                   formRef.current?.focus();
                 }
               }}
@@ -75,7 +76,7 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
               className="bg-transparent text-2xl focus:outline-none disabled:opacity-50 text-white"
             /><span className="text-slate-400 text-2xl">{suffix}</span>
           </div>
-          {!isFocused && !hasValue && <KeyboardHint keys="Tab" className="hidden sm:block" />}
+          {!isFocused && <KeyboardHint keys="Tab" className="hidden sm:block" />}
         </div>
         <button
           type="submit"
