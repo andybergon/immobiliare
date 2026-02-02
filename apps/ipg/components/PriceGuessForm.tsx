@@ -18,6 +18,7 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
   const [rawValue, setRawValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = parseInput(e.target.value);
@@ -42,7 +43,7 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
   const suffix = getSuffixZeros(rawValue);
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form ref={formRef} onSubmit={handleSubmit} tabIndex={-1}>
       <label htmlFor="price-guess" className="block text-lg mb-2">
         Quanto costa questo immobile?
       </label>
@@ -65,12 +66,11 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
               onBlur={() => setIsFocused(false)}
               onKeyDown={(e) => {
                 if (e.key === "Escape") {
-                  e.currentTarget.blur();
+                  formRef.current?.focus();
                 }
               }}
               placeholder="350"
               disabled={disabled}
-              tabIndex={1}
               style={{ fieldSizing: "content" } as React.CSSProperties}
               className="bg-transparent text-2xl focus:outline-none disabled:opacity-50 text-white"
             /><span className="text-slate-400 text-2xl">{suffix}</span>
@@ -80,7 +80,6 @@ export function PriceGuessForm({ onSubmit, disabled = false }: PriceGuessFormPro
         <button
           type="submit"
           disabled={disabled || !hasValue}
-          tabIndex={2}
           className="bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-bold py-3 px-4 sm:px-5 rounded-lg transition-colors flex items-center justify-center gap-2"
           title="Premi Invio per confermare"
         >
