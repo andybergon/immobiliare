@@ -134,8 +134,8 @@
       "area": "nord",
       "city": "roma",
       "coordinates": {
-        "lat": 41.9117,
-        "lng": 12.5183
+        "lat": 41.9187,
+        "lng": 12.5205
       },
       "region": "lazio",
       "immobiliareZ2": 10148,
@@ -148,8 +148,8 @@
       "area": "nord",
       "city": "roma",
       "coordinates": {
-        "lat": 41.95,
-        "lng": 12.55
+        "lat": 41.9448,
+        "lng": 12.5515
       },
       "region": "lazio",
       "immobiliareZ2": 10161,
@@ -162,8 +162,8 @@
       "area": "nord",
       "city": "roma",
       "coordinates": {
-        "lat": 41.945,
-        "lng": 12.53
+        "lat": 41.9448,
+        "lng": 12.5515
       },
       "region": "lazio",
       "immobiliareZ2": 10161,
@@ -176,8 +176,8 @@
       "area": "nord",
       "city": "roma",
       "coordinates": {
-        "lat": 41.94,
-        "lng": 12.465
+        "lat": 41.9476,
+        "lng": 12.4664
       },
       "region": "lazio",
       "immobiliareZ2": 10159,
@@ -190,8 +190,8 @@
       "area": "nord",
       "city": "roma",
       "coordinates": {
-        "lat": 41.935,
-        "lng": 12.455
+        "lat": 41.9458,
+        "lng": 12.4726
       },
       "region": "lazio",
       "immobiliareZ2": 10159,
@@ -204,8 +204,8 @@
       "area": "nord",
       "city": "roma",
       "coordinates": {
-        "lat": 41.9133,
-        "lng": 12.4983
+        "lat": 41.9539,
+        "lng": 12.5224
       },
       "region": "lazio",
       "immobiliareZ2": 10161,
@@ -260,8 +260,8 @@
       "area": "sud",
       "city": "roma",
       "coordinates": {
-        "lat": 41.8583,
-        "lng": 12.4767
+        "lat": 41.8542,
+        "lng": 12.482
       },
       "region": "lazio",
       "immobiliareZ2": 10154,
@@ -274,8 +274,8 @@
       "area": "sud",
       "city": "roma",
       "coordinates": {
-        "lat": 41.8517,
-        "lng": 12.47
+        "lat": 41.8628,
+        "lng": 12.4713
       },
       "region": "lazio",
       "immobiliareZ2": 10154,
@@ -288,8 +288,8 @@
       "area": "sud",
       "city": "roma",
       "coordinates": {
-        "lat": 41.81,
-        "lng": 12.455
+        "lat": 41.8181,
+        "lng": 12.4434
       },
       "region": "lazio",
       "immobiliareZ2": 10169,
@@ -302,8 +302,8 @@
       "area": "sud",
       "city": "roma",
       "coordinates": {
-        "lat": 41.82,
-        "lng": 12.485
+        "lat": 41.7916,
+        "lng": 12.4892
       },
       "region": "lazio",
       "immobiliareZ2": 10307,
@@ -316,8 +316,8 @@
       "area": "sud",
       "city": "roma",
       "coordinates": {
-        "lat": 41.845,
-        "lng": 12.5
+        "lat": 41.8473,
+        "lng": 12.49
       },
       "region": "lazio",
       "immobiliareZ2": 10167,
@@ -358,8 +358,8 @@
       "area": "est",
       "city": "roma",
       "coordinates": {
-        "lat": 41.87,
-        "lng": 12.53
+        "lat": 41.8761,
+        "lng": 12.5275
       },
       "region": "lazio",
       "immobiliareZ2": 10152,
@@ -372,8 +372,8 @@
       "area": "est",
       "city": "roma",
       "coordinates": {
-        "lat": 41.855,
-        "lng": 12.565
+        "lat": 41.8581,
+        "lng": 12.5712
       },
       "region": "lazio",
       "immobiliareZ2": 10283,
@@ -386,8 +386,8 @@
       "area": "est",
       "city": "roma",
       "coordinates": {
-        "lat": 41.875,
-        "lng": 12.56
+        "lat": 41.8838,
+        "lng": 12.5668
       },
       "region": "lazio",
       "immobiliareZ2": 10164,
@@ -414,8 +414,8 @@
       "area": "est",
       "city": "roma",
       "coordinates": {
-        "lat": 41.8817,
-        "lng": 12.535
+        "lat": 41.8754,
+        "lng": 12.5429
       },
       "region": "lazio",
       "immobiliareZ2": 10164,
@@ -428,8 +428,8 @@
       "area": "est",
       "city": "roma",
       "coordinates": {
-        "lat": 41.905,
-        "lng": 12.55
+        "lat": 41.9142,
+        "lng": 12.5449
       },
       "region": "lazio",
       "immobiliareZ2": 10163,
@@ -456,8 +456,8 @@
       "area": "ovest",
       "city": "roma",
       "coordinates": {
-        "lat": 41.87,
-        "lng": 12.45
+        "lat": 41.875,
+        "lng": 12.4509
       },
       "region": "lazio",
       "immobiliareZ2": 10304,
@@ -470,8 +470,8 @@
       "area": "ovest",
       "city": "roma",
       "coordinates": {
-        "lat": 41.895,
-        "lng": 12.43
+        "lat": 41.8966,
+        "lng": 12.4156
       },
       "region": "lazio",
       "immobiliareZ2": 10172,
@@ -484,8 +484,8 @@
       "area": "ovest",
       "city": "roma",
       "coordinates": {
-        "lat": 41.915,
-        "lng": 12.435
+        "lat": 41.9178,
+        "lng": 12.4407
       },
       "region": "lazio",
       "immobiliareZ2": 10281,
@@ -498,8 +498,8 @@
       "area": "ovest",
       "city": "roma",
       "coordinates": {
-        "lat": 41.92,
-        "lng": 12.445
+        "lat": 41.9482,
+        "lng": 12.4213
       },
       "region": "lazio",
       "immobiliareZ2": 10302,
@@ -512,8 +512,8 @@
       "area": "ovest",
       "city": "roma",
       "coordinates": {
-        "lat": 41.93,
-        "lng": 12.42
+        "lat": 41.913,
+        "lng": 12.4167
       },
       "region": "lazio",
       "immobiliareZ2": 10173,
@@ -526,8 +526,8 @@
       "area": "ovest",
       "city": "roma",
       "coordinates": {
-        "lat": 41.905,
-        "lng": 12.405
+        "lat": 41.9077,
+        "lng": 12.4197
       },
       "region": "lazio",
       "immobiliareZ2": 10172,
@@ -540,8 +540,8 @@
       "area": "ovest",
       "city": "roma",
       "coordinates": {
-        "lat": 41.875,
-        "lng": 12.44
+        "lat": 41.8654,
+        "lng": 12.441
       },
       "region": "lazio",
       "immobiliareZ2": 10304,
@@ -554,8 +554,8 @@
       "area": "litorale",
       "city": "roma",
       "coordinates": {
-        "lat": 41.7283,
-        "lng": 12.3456
+        "lat": 41.7669,
+        "lng": 12.3669
       },
       "region": "lazio",
       "immobiliareZ2": 10259,
@@ -568,8 +568,8 @@
       "area": "litorale",
       "city": "roma",
       "coordinates": {
-        "lat": 41.745,
-        "lng": 12.365
+        "lat": 41.7556,
+        "lng": 12.3519
       },
       "region": "lazio",
       "immobiliareZ2": 10259,
@@ -582,8 +582,8 @@
       "area": "litorale",
       "city": "roma",
       "coordinates": {
-        "lat": 41.735,
-        "lng": 12.33
+        "lat": 41.7327,
+        "lng": 12.3597
       },
       "region": "lazio",
       "immobiliareZ2": 10259,
@@ -596,8 +596,8 @@
       "area": "litorale",
       "city": "roma",
       "coordinates": {
-        "lat": 41.7558,
-        "lng": 12.2917
+        "lat": 41.7586,
+        "lng": 12.3163
       },
       "region": "lazio",
       "immobiliareZ2": 10181,
@@ -610,8 +610,8 @@
       "area": "litorale",
       "city": "roma",
       "coordinates": {
-        "lat": 41.735,
-        "lng": 12.295
+        "lat": 41.732,
+        "lng": 12.2879
       },
       "region": "lazio",
       "immobiliareZ2": 10181,
@@ -624,8 +624,8 @@
       "area": "litorale",
       "city": "roma",
       "coordinates": {
-        "lat": 41.728,
-        "lng": 12.265
+        "lat": 41.736,
+        "lng": 12.2717
       },
       "region": "lazio",
       "immobiliareZ2": 10181,
@@ -638,8 +638,8 @@
       "area": "litorale",
       "city": "roma",
       "coordinates": {
-        "lat": 41.73,
-        "lng": 12.28
+        "lat": 41.7364,
+        "lng": 12.2848
       },
       "region": "lazio",
       "immobiliareZ2": 10181
@@ -651,8 +651,8 @@
       "area": "litorale",
       "city": "roma",
       "coordinates": {
-        "lat": 41.7567,
-        "lng": 12.3517
+        "lat": 41.7832,
+        "lng": 12.3688
       },
       "region": "lazio",
       "immobiliareZ2": 10180,
@@ -665,8 +665,8 @@
       "area": "periferia",
       "city": "roma",
       "coordinates": {
-        "lat": 41.97,
-        "lng": 12.555
+        "lat": 41.9733,
+        "lng": 12.5368
       },
       "region": "lazio",
       "immobiliareZ2": 10162,
@@ -679,8 +679,8 @@
       "area": "periferia",
       "city": "roma",
       "coordinates": {
-        "lat": 41.965,
-        "lng": 12.54
+        "lat": 41.9802,
+        "lng": 12.5595
       },
       "region": "lazio",
       "immobiliareZ2": 10176,
@@ -707,8 +707,8 @@
       "area": "periferia",
       "city": "roma",
       "coordinates": {
-        "lat": 41.865,
-        "lng": 12.6
+        "lat": 41.8744,
+        "lng": 12.6239
       },
       "region": "lazio",
       "immobiliareZ2": 10177,

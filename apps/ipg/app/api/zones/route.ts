@@ -13,6 +13,8 @@ interface ZoneConfig {
   area: string;
   city: string;
   coordinates: { lat: number; lng: number };
+  immobiliareZ2?: number;
+  immobiliareZ3?: number;
 }
 
 interface ZonesFile {
@@ -41,6 +43,8 @@ export async function GET() {
         lat: zone.coordinates.lat,
         lng: zone.coordinates.lng,
         listingCount: listings.length,
+        z2: zone.immobiliareZ2,
+        z3: zone.immobiliareZ3,
       };
     })
   );

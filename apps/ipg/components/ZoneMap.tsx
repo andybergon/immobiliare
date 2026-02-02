@@ -14,7 +14,11 @@ interface Zone {
   lat: number;
   lng: number;
   listingCount: number;
+  z2?: number;
+  z3?: number;
 }
+
+const isDev = process.env.NODE_ENV === "development";
 
 function createCountIcon(count: number) {
   const hasListings = count > 0;
@@ -89,7 +93,16 @@ export default function ZoneMap() {
             <Popup>
               <div className="text-center min-w-[120px]">
                 <h3 className="font-bold text-lg">{zone.name}</h3>
-                <p className="text-gray-500 text-xs uppercase mb-1">{zone.area}</p>
+                {isDev ? (
+                  <>
+                    <p className="text-gray-400 text-xs font-mono">
+                      {zone.z3 ? `microzone=${zone.z3}` : `macrozone=${zone.z2}`}
+                    </p>
+                    <p className="text-gray-500 text-xs mb-1">macroarea: {zone.area}</p>
+                  </>
+                ) : (
+                  <p className="text-gray-500 text-xs uppercase mb-1">{zone.area}</p>
+                )}
                 <p className="text-gray-600 mb-2">
                   {zone.listingCount} annunci
                 </p>
