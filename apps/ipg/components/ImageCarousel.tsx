@@ -7,7 +7,7 @@ interface ImageCarouselProps {
   title: string;
 }
 
-const LOADER_DELAY_MS = 200;
+const LOADER_DELAY_MS = 150;
 
 export function ImageCarousel({ images, title }: ImageCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -99,7 +99,7 @@ export function ImageCarousel({ images, title }: ImageCarouselProps) {
 
       {showLoader && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-12 h-12 border-4 border-black/40 border-t-black rounded-full animate-spin" />
+          <div className="w-8 h-8 border-3 border-black/40 border-t-black rounded-full animate-spin" />
         </div>
       )}
 
