@@ -34,6 +34,15 @@ export default function Home() {
             </p>
           </Link>
         </div>
+
+        {process.env.NODE_ENV === "development" && (
+          <Link
+            href="/admin"
+            className="fixed bottom-4 right-4 px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-600 rounded text-slate-400 hover:text-slate-200 text-xs transition-colors"
+          >
+            Admin
+          </Link>
+        )}
       </div>
     </main>
   );

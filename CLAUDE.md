@@ -9,6 +9,7 @@ Turborepo + Bun monorepo for a real estate price guessing game using Rome listin
 │   └── ipg/                      # Next.js 16 app (App Router)
 │       ├── app/
 │       │   ├── page.tsx          # Home (Map vs Arcade mode)
+│       │   ├── admin/            # Admin zone tree (dev only)
 │       │   ├── map/              # Interactive Rome zone map
 │       │   └── play/[zone]/      # Game routes
 │       │       ├── page.tsx      # Redirects to random listing
@@ -112,7 +113,9 @@ bun run jobs/collect-data -- --area=litorale           # All litorale zones
 bun run jobs/collect-data -- --all                     # All 51 zones
 bun run jobs/collect-data -- --zones=axa --limit=500   # Custom limit
 bun run jobs/collect-data -- --scraper=apify           # Use Apify instead (paid)
-bun run jobs/collect-data -- --dry-run                 # Preview only
+bun run jobs/collect-data -- --sleep-between-listings-ms=100  # Delay between pages (default: 50ms)
+bun run jobs/collect-data -- --sleep-between-zones-s=5        # Delay between zones (default: 0)
+bun run jobs/collect-data -- --dry-run                 # Preview only (shows time estimate)
 ```
 
 ## Storage
@@ -309,6 +312,7 @@ bun run jobs/collect-data/get-counts.ts --json
 - `/map` - Interactive Leaflet map of Rome zones with listing counts
 - `/play/{zone}` - Redirects to random listing in zone
 - `/play/{zone}/{listingId}` - Game for specific listing (stable URL)
+- `/admin` - Zone tree view with stats (dev mode only, link shows on homepage)
 
 ## Price Input
 
@@ -352,9 +356,12 @@ import { LocalDB, type Listing, type Zone } from "@ipg/db";
 
 const db = new LocalDB({ dataDir: "./data" });
 const listings = await db.getListings("roma-axa");
+const playable = await db.getListings("roma-axa", { playableOnly: true });  // Exclude price=0
 const zones = await db.getZones("litorale");  // Filter by area
 const { added, updated, unchanged } = await db.saveSnapshotDeduped(snapshot);
 ```
+
+**Note:** Listings with `price: 0` ("Prezzo su richiesta") are stored in the DB but filtered out for the game using `playableOnly: true`. Admin views show all listings.
 
 ## Tech Stack
 

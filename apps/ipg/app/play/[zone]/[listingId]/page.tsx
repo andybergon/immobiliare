@@ -13,7 +13,7 @@ async function getZoneBySlug(slug: string): Promise<Zone | null> {
 
 async function getListingById(zoneId: string, listingId: string): Promise<Listing | null> {
   const db = new LocalDB({ dataDir: DATA_DIR });
-  const listings = await db.getListings(zoneId);
+  const listings = await db.getListings(zoneId, { playableOnly: true });
   return listings.find((l) => l.sourceId === listingId) || null;
 }
 
@@ -22,7 +22,7 @@ async function getListingContext(
   currentId: string
 ): Promise<{ prev: string | null; next: string | null; total: number; current: number }> {
   const db = new LocalDB({ dataDir: DATA_DIR });
-  const listings = await db.getListings(zoneId);
+  const listings = await db.getListings(zoneId, { playableOnly: true });
   const currentIndex = listings.findIndex((l) => l.sourceId === currentId);
 
   if (currentIndex === -1) {

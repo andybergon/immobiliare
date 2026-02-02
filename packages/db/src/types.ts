@@ -39,6 +39,12 @@ export interface Listing {
 /**
  * Zone hierarchy: region > city > area > zone
  * Example: lazio > roma > litorale > axa
+ *
+ * Immobiliare.it zone hierarchy:
+ * - pr: Province (e.g., "RM")
+ * - c: City ID (e.g., 6737 for Roma)
+ * - z2: Macrozone - broad areas grouping multiple neighborhoods (e.g., "Axa, Casal Palocco, Infernetto")
+ * - z3: Microzone - granular neighborhoods (e.g., "Axa")
  */
 export interface Zone {
   id: string;
@@ -51,6 +57,10 @@ export interface Zone {
     lat: number;
     lng: number;
   };
+  /** Immobiliare.it macrozone ID (z2 parameter) - broad area grouping multiple neighborhoods */
+  immobiliareZ2?: number;
+  /** Immobiliare.it microzone ID (z3 parameter) - specific neighborhood */
+  immobiliareZ3?: number;
 }
 
 export interface SnapshotMetadata {

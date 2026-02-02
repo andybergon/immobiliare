@@ -146,7 +146,7 @@ export class LocalDB implements DB {
     return filtered[0] || null;
   }
 
-  async getListings(zoneId: string): Promise<Listing[]> {
+  async getListings(zoneId: string, options?: { playableOnly?: boolean }): Promise<Listing[]> {
     const immobiliare = await this.getLatestSnapshot(zoneId, "immobiliare");
     const idealista = await this.getLatestSnapshot(zoneId, "idealista");
 
@@ -159,19 +159,20 @@ export class LocalDB implements DB {
       const key = `${l.source}-${l.sourceId}`;
       if (seen.has(key)) return false;
       seen.add(key);
+      if (options?.playableOnly && l.price === 0) return false;
       return true;
     });
   }
 
   async getRandomListing(zoneId: string): Promise<Listing | null> {
-    const listings = await this.getListings(zoneId);
+    const listings = await this.getListings(zoneId, { playableOnly: true });
     if (listings.length === 0) return null;
     const idx = Math.floor(Math.random() * listings.length);
     return listings[idx];
   }
 
   async getRandomListings(zoneId: string, count: number): Promise<Listing[]> {
-    const listings = await this.getListings(zoneId);
+    const listings = await this.getListings(zoneId, { playableOnly: true });
     const shuffled = [...listings].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, count);
   }
