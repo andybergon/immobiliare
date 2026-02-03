@@ -8,7 +8,21 @@ interface PropertyCardProps {
   showPrice?: boolean;
 }
 
+function formatCountForBadge(value: number | null, raw: string | null): string | null {
+  if (raw) {
+    const plus = raw.match(/(\d+)\s*\+/);
+    if (plus) return `${plus[1]}+`;
+    const digits = raw.match(/(\d+)/);
+    if (digits) return digits[1];
+  }
+  if (value === null) return null;
+  return String(value);
+}
+
 export function PropertyCard({ listing, showPrice = false }: PropertyCardProps) {
+  const rooms = formatCountForBadge(listing.features.rooms, listing.features.roomsRaw);
+  const bathrooms = formatCountForBadge(listing.features.bathrooms, listing.features.bathroomsRaw);
+
   return (
     <div className="bg-slate-700 rounded-lg overflow-hidden">
       <ImageCarousel images={listing.images} title={listing.title} />
@@ -45,16 +59,16 @@ export function PropertyCard({ listing, showPrice = false }: PropertyCardProps) 
               <span>{listing.features.area} m²</span>
             </div>
           )}
-          {listing.features.rooms && (
+          {rooms && (
             <div className="flex items-center gap-1 bg-slate-600 px-3 py-1 rounded-full">
               <span>🚪</span>
-              <span>{listing.features.rooms} locali</span>
+              <span>{rooms} locali</span>
             </div>
           )}
-          {listing.features.bathrooms && (
+          {bathrooms && (
             <div className="flex items-center gap-1 bg-slate-600 px-3 py-1 rounded-full">
               <span>🚿</span>
-              <span>{listing.features.bathrooms} bagni</span>
+              <span>{bathrooms} bagni</span>
             </div>
           )}
           {listing.features.floor !== null && (
