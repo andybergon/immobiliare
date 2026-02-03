@@ -20,8 +20,18 @@ function formatCountForBadge(value: number | null, raw: string | null): string |
 }
 
 export function PropertyCard({ listing, showPrice = false }: PropertyCardProps) {
-  const rooms = formatCountForBadge(listing.features.rooms, listing.features.roomsRaw);
-  const bathrooms = formatCountForBadge(listing.features.bathrooms, listing.features.bathroomsRaw);
+  const roomsBase = formatCountForBadge(listing.features.rooms, listing.features.roomsRaw);
+  const bathroomsBase = formatCountForBadge(listing.features.bathrooms, listing.features.bathroomsRaw);
+
+  const rooms =
+    listing.source === "immobiliare" && !listing.features.roomsRaw && listing.features.rooms === 5
+      ? "5+"
+      : roomsBase;
+
+  const bathrooms =
+    listing.source === "immobiliare" && !listing.features.bathroomsRaw && listing.features.bathrooms === 3
+      ? "3+"
+      : bathroomsBase;
 
   return (
     <div className="bg-slate-700 rounded-lg overflow-hidden">
