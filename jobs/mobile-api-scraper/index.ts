@@ -1,4 +1,4 @@
-import { LocalDB, type Snapshot } from "@ipg/db";
+import { LocalDB, type Snapshot, type Zone } from "@ipg/db";
 import { getZonesBySlug, getAllZones, getZonesByArea, getAreas } from "./zones.js";
 import { scrapeWithMobileApi } from "./mobile-scraper.js";
 import { scrapeWithApify } from "./apify-scraper.js";
@@ -36,7 +36,9 @@ const db = new LocalDB({ dataDir: DATA_DIR });
 const PROPERTIES_URL = "https://ios-imm-v4.ws-app.com/b2c/v1/properties";
 const PAGE_SIZE = 20;
 
-async function getZoneListingCount(zone: { immobiliareZ2?: number; immobiliareZ3?: number }): Promise<number | null> {
+async function getZoneListingCount(
+  zone: Pick<Zone, "immobiliareZ2" | "immobiliareZ3">
+): Promise<number | null> {
   if (!zone.immobiliareZ3 && !zone.immobiliareZ2) return null;
 
   const params = new URLSearchParams({
@@ -68,7 +70,7 @@ function formatDuration(seconds: number): string {
 }
 
 async function collectZone(
-  zone: { id: string; name: string; slug: string; city: string },
+  zone: Zone,
   options: CollectOptions
 ): Promise<void> {
   console.log(`\n📍 ${zone.name} (${zone.slug})`);
@@ -81,11 +83,11 @@ async function collectZone(
   try {
     const result =
       options.scraper === "apify"
-        ? await scrapeWithApify(zone as any, {
+        ? await scrapeWithApify(zone, {
             limit: options.limit,
             maxPages: options.maxPages,
           })
-        : await scrapeWithMobileApi(zone as any, {
+        : await scrapeWithMobileApi(zone, {
             limit: options.limit,
             pageDelay: options.sleepBetweenListings,
           });
@@ -226,7 +228,7 @@ ${allZones.map((z) => `  - ${z.slug} (${z.name}) [${z.area}]`).join("\n")}
   let unknownZones = 0;
 
   for (const zone of zones) {
-    const count = await getZoneListingCount(zone as any);
+    const count = await getZoneListingCount(zone);
     zoneCounts.push({ zone, count });
     if (count !== null) {
       totalListings += count;

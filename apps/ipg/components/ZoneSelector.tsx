@@ -5,10 +5,9 @@ import type { Zone } from "@ipg/db";
 
 interface ZoneSelectorProps {
   zones: Zone[];
-  region: string;
 }
 
-export function ZoneSelector({ zones, region }: ZoneSelectorProps) {
+export function ZoneSelector({ zones }: ZoneSelectorProps) {
   const groupedByCity = zones.reduce((acc, zone) => {
     const city = zone.city.charAt(0).toUpperCase() + zone.city.slice(1);
     if (!acc[city]) acc[city] = [];

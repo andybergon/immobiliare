@@ -1,5 +1,7 @@
 import { ApifyClient } from "apify-client";
 import type { Listing, Zone } from "@ipg/db";
+import { extractImageId } from "@ipg/db/client";
+import { parseCount, parseFloor, parseNumber } from "./parsing.js";
 
 // Apify actor for immobiliare.it scraping
 // Try: memo23/immobiliare-scraper (pay-per-result), ecomscrape/immobiliare-property-search-scraper
@@ -58,43 +60,6 @@ function buildSearchUrl(zone: Zone): string {
   return `https://www.immobiliare.it/vendita-case/${zone.city}/${zone.slug}/?criterio=dataModifica&ordine=desc`;
 }
 
-function parseNumber(value: string | number | undefined | null): number | null {
-  if (value === undefined || value === null) return null;
-  if (typeof value === "number") return value;
-  const match = value.match(/(\d+)/);
-  return match ? parseInt(match[1], 10) : null;
-}
-
-function parseCount(value: string | number | undefined | null): { value: number | null; raw: string | null } {
-  if (value === undefined || value === null) return { value: null, raw: null };
-  if (typeof value === "number") return { value, raw: null };
-  const s = value.trim();
-  if (!s) return { value: null, raw: null };
-
-  const plusMatch = s.match(/^(\d+)\s*\+$/);
-  if (plusMatch) {
-    return { value: parseInt(plusMatch[1], 10), raw: `${plusMatch[1]}+` };
-  }
-
-  const intMatch = s.match(/^(\d+)$/);
-  if (intMatch) {
-    return { value: parseInt(intMatch[1], 10), raw: null };
-  }
-
-  const anyDigits = s.match(/(\d+)/);
-  if (!anyDigits) return { value: null, raw: s };
-  return { value: parseInt(anyDigits[1], 10), raw: s };
-}
-
-function parseFloor(value: string | number | undefined | null): { value: number | null; raw: string | null } {
-  if (value === undefined || value === null) return { value: null, raw: null };
-  if (typeof value === "number") return { value, raw: null };
-  const s = value.trim();
-  if (!s) return { value: null, raw: null };
-  if (/^-?\d+$/.test(s)) return { value: parseInt(s, 10), raw: null };
-  return { value: null, raw: s };
-}
-
 function parsePrice(value: unknown): { price: number; formatted: string } {
   if (!value) return { price: 0, formatted: "N/A" };
   if (typeof value === "number") {
@@ -120,13 +85,16 @@ function extractImages(result: ApifyListingResult): string[] {
   if (result.media?.images) {
     for (const img of result.media.images) {
       const url = img?.hd || img?.sd;
-      if (url) {
-        images.push(url);
-      }
+      if (!url) continue;
+      if (url.includes("placeholder") || url.includes("data:image")) continue;
+
+      const cleanUrl = url.replace(/\?.*$/, "");
+      const id = extractImageId(cleanUrl);
+      images.push(id || cleanUrl);
     }
   }
 
-  return images.filter((img) => img && !img.includes("placeholder") && !img.includes("data:image"));
+  return Array.from(new Set(images));
 }
 
 function getMainDataValue(result: ApifyListingResult, label: string): string | null {

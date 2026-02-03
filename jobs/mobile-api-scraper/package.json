@@ -5,11 +5,11 @@
   "private": true,
   "scripts": {
     "start": "bun run index.ts",
-    "build": "bun build index.ts --outdir=dist --target=node"
+    "build": "bun build index.ts --outdir=dist --target=node",
+    "test": "bun test"
   },
   "dependencies": {
     "@ipg/db": "workspace:*",
-    "@ipg/scraper": "workspace:*",
     "apify-client": "^2.11.0",
     "playwright": "^1.50.0",
     "playwright-extra": "^4.3.6",

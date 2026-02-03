@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from "react";
 import {
   buildImageUrl,
   type ImageSize,
@@ -30,27 +30,30 @@ function getImageUrl(imageOrId: string, size: ImageSize): string {
 const isDev = process.env.NODE_ENV === "development";
 const MOBILE_BREAKPOINT = 768;
 
-function getResponsiveSize(): ImageSize {
-  if (typeof window === "undefined") return IMAGE_SIZE_DESKTOP;
-  return window.innerWidth < MOBILE_BREAKPOINT ? IMAGE_SIZE_MOBILE : IMAGE_SIZE_DESKTOP;
-}
+const SERVER_WIDTH_FALLBACK = 1024;
 
 export function ImageCarousel({ images, title }: ImageCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loadedIndex, setLoadedIndex] = useState(0);
   const [showLoader, setShowLoader] = useState(false);
-  const [imageSize, setImageSize] = useState<ImageSize>(IMAGE_SIZE_DESKTOP);
+  const [manualImageSize, setManualImageSize] = useState<ImageSize>(IMAGE_SIZE_DESKTOP);
   const [showSizeMenu, setShowSizeMenu] = useState(false);
   const [manualSize, setManualSize] = useState(false);
   const loaderTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    if (manualSize) return;
-    setImageSize(getResponsiveSize());
-    const handleResize = () => setImageSize(getResponsiveSize());
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [manualSize]);
+  const windowWidth = useSyncExternalStore(
+    (onStoreChange) => {
+      if (typeof window === "undefined") return () => {};
+      window.addEventListener("resize", onStoreChange);
+      return () => window.removeEventListener("resize", onStoreChange);
+    },
+    () => window.innerWidth,
+    () => SERVER_WIDTH_FALLBACK
+  );
+
+  const responsiveSize: ImageSize =
+    windowWidth < MOBILE_BREAKPOINT ? IMAGE_SIZE_MOBILE : IMAGE_SIZE_DESKTOP;
+  const imageSize = manualSize ? manualImageSize : responsiveSize;
 
   const placeholderImage = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800";
   const rawImages = images.length > 0 ? images : [placeholderImage];
@@ -183,7 +186,7 @@ export function ImageCarousel({ images, title }: ImageCarouselProps) {
                   <button
                     key={size}
                     onClick={() => {
-                      setImageSize(size);
+                      setManualImageSize(size);
                       setManualSize(true);
                       setShowSizeMenu(false);
                     }}

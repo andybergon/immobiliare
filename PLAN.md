@@ -32,7 +32,7 @@ A price guessing game for Italian real estate. Users select regions/zones on an 
 
 ### Sprint 1: Data Foundation
 - [x] Monorepo setup (Turborepo + Bun)
-- [x] Basic scraper (@ipg/scraper)
+- [x] Basic scraper (mobile API + Apify fallback)
 - [x] @ipg/db package with local JSON storage
 - [x] Data collection job with Playwright
 - [x] Zone configuration (Axa, Casal Palocco, Infernetto)
@@ -53,29 +53,13 @@ A price guessing game for Italian real estate. Users select regions/zones on an 
 
 ## Remaining Work
 
-### Data Collection (Blocked)
+### Data Collection
 
-The scraping job is blocked by DataDome CAPTCHA protection on immobiliare.it. Options to resolve:
+The immobiliare.it **website HTML** is blocked by DataDome, but data collection works via the
+public **mobile app API** (`ios-imm-v4.ws-app.com`) with no API key required.
 
-1. **Captcha Solving Service** (2captcha, Anti-Captcha)
-   - Cost: ~$2-3 per 1000 solves
-   - Pro: Works reliably
-   - Con: Ongoing cost
-
-2. **Residential Proxies**
-   - Services: Bright Data, Oxylabs
-   - Pro: Avoid detection
-   - Con: Expensive ($15+/GB)
-
-3. **Manual Cookie Extraction**
-   - Visit site in browser, export cookies
-   - Pro: Free
-   - Con: Cookies expire, manual process
-
-4. **Official API**
-   - Contact immobiliare.it for API access
-   - Pro: Reliable, legal
-   - Con: May not exist or be expensive
+- Default: mobile API scraper (free)
+- Fallback: Apify actor (paid)
 
 ### Sprint 2: Idealista Scraper
 - [ ] Add Idealista scraper (also uses anti-bot protection)
@@ -105,11 +89,17 @@ The scraping job is blocked by DataDome CAPTCHA protection on immobiliare.it. Op
 - Property card with image carousel
 - Price guessing with score calculation
 
-**Blocked:** Real-time data collection due to anti-bot protection
+**Data collection:** Works via mobile API scraper (website HTML scraping is still blocked by DataDome)
 
 **Commands:**
 ```bash
-# Run the app
+# Install
+bun install
+
+# Run everything (recommended)
+bun run dev
+
+# Run the app only
 cd apps/ipg && bun dev
 
 # Test data collection (mobile API)
@@ -136,7 +126,6 @@ immobiliare/
 │           ├── PriceGuessForm.tsx
 │           └── ScoreDisplay.tsx
 ├── packages/
-│   ├── scraper/                    # @ipg/scraper
 │   └── db/                         # @ipg/db
 │       └── src/
 │           ├── types.ts
@@ -150,8 +139,8 @@ immobiliare/
 │       └── zones.ts
 ├── data/
 │   ├── zones.json
-│   └── snapshots/2026-01-31/
-│       └── lazio-roma-axa-immobiliare.json
+│   └── listings/                   # per-zone compact snapshots
+│       └── {region}/{city}/{area}/{slug}/immobiliare.json
 ├── turbo.json
 ├── package.json
 ├── CLAUDE.md

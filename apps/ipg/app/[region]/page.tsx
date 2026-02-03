@@ -8,7 +8,7 @@ const DATA_DIR = resolve(process.cwd(), "../../data");
 
 async function getZones(region: string): Promise<Zone[]> {
   const db = new LocalDB({ dataDir: DATA_DIR });
-  return db.getZones(region);
+  return db.getZones({ region });
 }
 
 const REGION_NAMES: Record<string, string> = {
@@ -54,7 +54,7 @@ export default async function RegionPage({ params }: PageProps) {
         <h1 className="text-4xl font-bold mb-2 mt-4">{regionName}</h1>
         <p className="text-slate-300 mb-8">Seleziona una zona per iniziare a giocare</p>
 
-        <ZoneSelector zones={zones} region={region} />
+        <ZoneSelector zones={zones} />
       </div>
     </main>
   );

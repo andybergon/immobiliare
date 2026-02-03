@@ -5,6 +5,7 @@ export type {
   ListingFeatures,
   Snapshot,
   Zone,
+  ZoneFilters,
 } from "./types.js";
 
 export type { ImageSize } from "./images.js";

@@ -16,7 +16,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "bun test --pass-with-no-tests"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

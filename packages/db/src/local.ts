@@ -1,7 +1,16 @@
 import { readFile, writeFile, mkdir, readdir } from "fs/promises";
 import { existsSync } from "fs";
 import { join, dirname } from "path";
-import type { DB, Listing, Snapshot, Zone, CompactListing, CompactSnapshot, ListingFeatures } from "./types.js";
+import type {
+  DB,
+  Listing,
+  Snapshot,
+  Zone,
+  ZoneFilters,
+  CompactListing,
+  CompactSnapshot,
+  ListingFeatures,
+} from "./types.js";
 
 export interface LocalDBOptions {
   dataDir: string;
@@ -236,12 +245,20 @@ export class LocalDB implements DB {
   }
 
   async getListings(zoneId: string, options?: { playableOnly?: boolean }): Promise<Listing[]> {
-    const immobiliare = await this.getLatestSnapshot(zoneId, "immobiliare");
-    const idealista = await this.getLatestSnapshot(zoneId, "idealista");
+    const snapshots = await this.getSnapshots(zoneId);
+
+    // In case we ever store multiple snapshots per source, keep only the latest per source.
+    const latestBySource = new Map<Snapshot["source"], Snapshot>();
+    for (const snapshot of snapshots) {
+      if (!latestBySource.has(snapshot.source)) {
+        latestBySource.set(snapshot.source, snapshot);
+      }
+    }
 
     const listings: Listing[] = [];
-    if (immobiliare) listings.push(...immobiliare.listings);
-    if (idealista) listings.push(...idealista.listings);
+    for (const snapshot of latestBySource.values()) {
+      listings.push(...snapshot.listings);
+    }
 
     const seen = new Set<string>();
     return listings.filter((l) => {
@@ -251,6 +268,47 @@ export class LocalDB implements DB {
       if (options?.playableOnly && l.price === 0) return false;
       return true;
     });
+  }
+
+  async getListingCount(
+    zoneId: string,
+    options?: { playableOnly?: boolean; source?: Snapshot["source"] }
+  ): Promise<number> {
+    const zone = await this.getZoneById(zoneId);
+    if (!zone) return 0;
+
+    const sources: Snapshot["source"][] = options?.source
+      ? [options.source]
+      : ["immobiliare", "idealista"];
+
+    const seen = new Set<string>();
+    for (const source of sources) {
+      const path = this.getListingPath(zone, source);
+      if (!existsSync(path)) continue;
+
+      try {
+        const content = await readFile(path, "utf-8");
+        const parsed = JSON.parse(content) as Record<string, unknown>;
+        const listings = (parsed.listings as unknown[]) || [];
+
+        for (const raw of listings) {
+          const l = raw as Record<string, unknown>;
+          const sourceId = typeof l.sourceId === "string" ? l.sourceId : null;
+          if (!sourceId) continue;
+
+          const price = typeof l.price === "number" ? l.price : 0;
+          if (options?.playableOnly && price === 0) continue;
+
+          const key = `${source}-${sourceId}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+        }
+      } catch {
+        // Ignore invalid files
+      }
+    }
+
+    return seen.size;
   }
 
   async getRandomListing(zoneId: string): Promise<Listing | null> {
@@ -266,9 +324,22 @@ export class LocalDB implements DB {
     return shuffled.slice(0, count);
   }
 
-  async getZones(area?: string): Promise<Zone[]> {
+  async getZones(filter?: string | ZoneFilters): Promise<Zone[]> {
     const zones = await this.loadZonesCache();
-    return area ? zones.filter((z) => z.area === area) : zones;
+    if (!filter) return zones;
+
+    // Backwards compatible: `string` means area.
+    if (typeof filter === "string") {
+      return zones.filter((z) => z.area === filter);
+    }
+
+    const { area, region, city } = filter;
+    return zones.filter((z) => {
+      if (area && z.area !== area) return false;
+      if (region && z.region !== region) return false;
+      if (city && z.city !== city) return false;
+      return true;
+    });
   }
 
   async getZone(zoneId: string): Promise<Zone | null> {
@@ -280,13 +351,18 @@ export class LocalDB implements DB {
     console.warn("saveZones is deprecated - edit data/zones.json directly");
   }
 
-  async getExistingListings(zoneId: string): Promise<Map<string, Listing>> {
+  async getExistingListings(
+    zoneId: string,
+    source?: Listing["source"]
+  ): Promise<Map<string, Listing>> {
     const listings = new Map<string, Listing>();
     const snapshots = await this.getSnapshots(zoneId);
     for (const snapshot of snapshots) {
+      if (source && snapshot.source !== source) continue;
       for (const listing of snapshot.listings) {
-        if (!listings.has(listing.sourceId)) {
-          listings.set(listing.sourceId, listing);
+        const key = `${listing.source}-${listing.sourceId}`;
+        if (!listings.has(key)) {
+          listings.set(key, listing);
         }
       }
     }
@@ -339,14 +415,14 @@ export class LocalDB implements DB {
   }
 
   async saveSnapshotDeduped(snapshot: Snapshot): Promise<{ added: number; updated: number; unchanged: number }> {
-    const existing = await this.getExistingListings(snapshot.zoneId);
+    const existing = await this.getExistingListings(snapshot.zoneId, snapshot.source);
     const toSave: Listing[] = [];
     let added = 0;
     let updated = 0;
     let unchanged = 0;
 
     for (const listing of snapshot.listings) {
-      const existingListing = existing.get(listing.sourceId);
+      const existingListing = existing.get(`${listing.source}-${listing.sourceId}`);
       if (!existingListing) {
         toSave.push(listing);
         added++;

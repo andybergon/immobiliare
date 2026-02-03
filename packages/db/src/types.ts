@@ -97,6 +97,12 @@ export interface Zone {
   immobiliareZ3?: number;
 }
 
+export interface ZoneFilters {
+  area?: string;
+  region?: string;
+  city?: string;
+}
+
 export interface SnapshotMetadata {
   requestedLimit?: number;
   returnedCount?: number;
@@ -118,10 +124,18 @@ export interface DB {
   getLatestSnapshot(zoneId: string, source?: "immobiliare" | "idealista"): Promise<Snapshot | null>;
 
   getListings(zoneId: string): Promise<Listing[]>;
+  getListingCount(zoneId: string, options?: { playableOnly?: boolean; source?: Snapshot["source"] }): Promise<number>;
   getRandomListing(zoneId: string): Promise<Listing | null>;
   getRandomListings(zoneId: string, count: number): Promise<Listing[]>;
 
-  getZones(area?: string): Promise<Zone[]>;
+  /**
+   * Get zones.
+   *
+   * Backwards compatible overload:
+   * - string argument filters by `area`
+   * - object argument supports filtering by `region`, `city`, and/or `area`
+   */
+  getZones(filter?: string | ZoneFilters): Promise<Zone[]>;
   getZone(zoneId: string): Promise<Zone | null>;
   saveZones(zones: Zone[]): Promise<void>;
 }

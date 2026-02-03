@@ -7,6 +7,7 @@ export type {
   ListingFeatures,
   Snapshot,
   Zone,
+  ZoneFilters,
   CompactListing,
   CompactSnapshot,
 } from "./types.js";

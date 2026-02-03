@@ -69,7 +69,7 @@ export default async function PlayListingPage({ params }: PageProps) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-slate-900 to-slate-800 text-white p-8">
         <h1 className="text-3xl font-bold mb-4">Annuncio non trovato</h1>
-        <p className="text-slate-300 mb-8">L'annuncio richiesto non esiste.</p>
+        <p className="text-slate-300 mb-8">L&apos;annuncio richiesto non esiste.</p>
         <Link
           href={`/play/${zoneSlug}`}
           className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-lg transition-colors"

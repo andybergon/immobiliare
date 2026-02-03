@@ -1,5 +1,6 @@
 import type { Listing, Zone } from "@ipg/db";
 import { extractImageId } from "@ipg/db/client";
+import { parseCount, parseFloor, parseNumber } from "./parsing.js";
 
 const RESOLVER_URL = "https://ios-imm-v4.ws-app.com/b2c/v1/resolver/url";
 const PROPERTIES_URL = "https://ios-imm-v4.ws-app.com/b2c/v1/properties";
@@ -78,47 +79,6 @@ interface ResolverResponse {
 
 function buildSearchUrl(zone: Zone): string {
   return `https://www.immobiliare.it/vendita-case/${zone.city}/${zone.slug}/`;
-}
-
-function parseNumber(value: string | number | undefined | null): number | null {
-  if (value === undefined || value === null) return null;
-  if (typeof value === "number") return value;
-  const match = String(value).match(/(\d+)/);
-  return match ? parseInt(match[1], 10) : null;
-}
-
-function parseCount(value: string | number | undefined | null): { value: number | null; raw: string | null } {
-  if (value === undefined || value === null) return { value: null, raw: null };
-  if (typeof value === "number") return { value, raw: null };
-
-  const s = String(value).trim();
-  if (!s) return { value: null, raw: null };
-
-  const plusMatch = s.match(/^(\d+)\s*\+$/);
-  if (plusMatch) {
-    return { value: parseInt(plusMatch[1], 10), raw: `${plusMatch[1]}+` };
-  }
-
-  const intMatch = s.match(/^(\d+)$/);
-  if (intMatch) {
-    return { value: parseInt(intMatch[1], 10), raw: null };
-  }
-
-  const anyDigits = s.match(/(\d+)/);
-  if (!anyDigits) {
-    return { value: null, raw: s };
-  }
-
-  return { value: parseInt(anyDigits[1], 10), raw: s };
-}
-
-function parseFloor(value: string | number | undefined | null): { value: number | null; raw: string | null } {
-  if (value === undefined || value === null) return { value: null, raw: null };
-  if (typeof value === "number") return { value, raw: null };
-  const s = String(value).trim();
-  if (!s) return { value: null, raw: null };
-  if (/^-?\d+$/.test(s)) return { value: parseInt(s, 10), raw: null };
-  return { value: null, raw: s };
 }
 
 function normalizeOtherFeatures(value: unknown): string[] | null {

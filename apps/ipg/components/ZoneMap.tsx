@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
-import { Icon, DivIcon } from "leaflet";
+import { DivIcon } from "leaflet";
 import Link from "next/link";
 import "leaflet/dist/leaflet.css";
 
