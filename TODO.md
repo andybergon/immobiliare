@@ -17,8 +17,27 @@
 ## Data
 
 - Scraping improvements
-  - Store 5+ instead of 5 if listing says 5+
-  - Store also camere da letto and not only locali and bagni. Store piani/balcone/terrazzo/arredato/tipologia/riscaldamento/climatiz/posto auto. In general all this metadata, then we will decide what to not show later.
+  - [x] Extend `ListingFeatures` in `packages/db/src/types.ts` to preserve richer metadata (keep numeric fields, add raw text variants)
+  - [x] Update `jobs/mobile-api-scraper/mobile-scraper.ts` normalization
+  - [x] Update `jobs/mobile-api-scraper/apify-scraper.ts` normalization (at least the "5+" fix)
+  - [x] Fix dedupe in `packages/db/src/local.ts` (set `previousPrice` only when price changes)
+  - [ ] Backfill by re-scraping zones to populate new metadata
+  - [ ] Add unit tests for parsing helpers (counts + floors)
+
+  Details
+  - `ListingFeatures` additions (store everything now, decide UI later)
+    - counts: add `roomsRaw`, `bathroomsRaw`, `bedroomsRaw` (e.g. "5+")
+    - floor: add `floorRaw` (e.g. "R") + keep numeric `floor`
+    - add `typology`, `heating`
+    - add booleans: `balcony`, `terrace`, `furnished`, `cellar`, `luxury`
+    - add `airConditioning`, `parking` (derived from feature strings when available)
+    - add `otherFeatures: string[]` (from mobile `analytics.otherFeatures`)
+  - Mobile API notes
+    - `/b2c/v1/properties/{id}` currently returns 403, so we rely on list payload `GET /b2c/v1/properties?...`
+  - Future map pins
+    - store per-listing location from `geography.geolocation` (lat/lng + visibilityType/geohash) and `geography.street`/`geography.zipcode`
+  - Optional
+    - remove Rome-only hardcoding (`c=6737`, `pr=RM`) where possible (mobile API works with just z2/z3 + cat/t)
 
 ### [ ] Restructure data to z2/z3 hierarchy
 Replace custom "area" grouping with immobiliare.it's z2/z3 hierarchy for consistency across Italy.

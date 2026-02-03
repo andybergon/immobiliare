@@ -32,8 +32,8 @@
         "typescript": "^5",
       },
     },
-    "jobs/collect-data": {
-      "name": "@ipg/collect-data",
+    "jobs/mobile-api-scraper": {
+      "name": "@ipg/mobile-api-scraper",
       "version": "0.1.0",
       "dependencies": {
         "@ipg/db": "workspace:*",
@@ -209,9 +209,9 @@
 
     "@img/sharp-win32-x64": ["@img/sharp-win32-x64@0.34.5", "", { "os": "win32", "cpu": "x64" }, "sha512-+29YMsqY2/9eFEiW93eqWnuLcWcufowXewwSNIT6UwZdUUCrM3oFjMWH/Z6/TMmb4hlFenmfAVbpWeup2jryCw=="],
 
-    "@ipg/collect-data": ["@ipg/collect-data@workspace:jobs/collect-data"],
-
     "@ipg/db": ["@ipg/db@workspace:packages/db"],
+
+    "@ipg/mobile-api-scraper": ["@ipg/mobile-api-scraper@workspace:jobs/mobile-api-scraper"],
 
     "@ipg/scraper": ["@ipg/scraper@workspace:packages/scraper"],
 

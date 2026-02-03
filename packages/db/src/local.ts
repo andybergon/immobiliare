@@ -1,7 +1,7 @@
 import { readFile, writeFile, mkdir, readdir } from "fs/promises";
 import { existsSync } from "fs";
 import { join, dirname } from "path";
-import type { DB, Listing, Snapshot, Zone, CompactListing, CompactSnapshot } from "./types.js";
+import type { DB, Listing, Snapshot, Zone, CompactListing, CompactSnapshot, ListingFeatures } from "./types.js";
 
 export interface LocalDBOptions {
   dataDir: string;
@@ -34,6 +34,36 @@ export class LocalDB implements DB {
   /**
    * Hydrate a compact listing into a full listing
    */
+  private normalizeFeatures(features: unknown): ListingFeatures {
+    const f = (features as Record<string, unknown>) || {};
+    return {
+      area: (f.area as number | null) ?? null,
+      rooms: (f.rooms as number | null) ?? null,
+      roomsRaw: (f.roomsRaw as string | null) ?? null,
+      bedrooms: (f.bedrooms as number | null) ?? null,
+      bedroomsRaw: (f.bedroomsRaw as string | null) ?? null,
+      bathrooms: (f.bathrooms as number | null) ?? null,
+      bathroomsRaw: (f.bathroomsRaw as string | null) ?? null,
+      floor: (f.floor as number | null) ?? null,
+      floorRaw: (f.floorRaw as string | null) ?? null,
+      totalFloors: (f.totalFloors as number | null) ?? null,
+      elevator: (f.elevator as boolean | null) ?? null,
+      energyClass: (f.energyClass as string | null) ?? null,
+      yearBuilt: (f.yearBuilt as number | null) ?? null,
+      condition: (f.condition as string | null) ?? null,
+      typology: (f.typology as string | null) ?? null,
+      heating: (f.heating as string | null) ?? null,
+      balcony: (f.balcony as boolean | null) ?? null,
+      terrace: (f.terrace as boolean | null) ?? null,
+      furnished: (f.furnished as boolean | null) ?? null,
+      cellar: (f.cellar as boolean | null) ?? null,
+      luxury: (f.luxury as boolean | null) ?? null,
+      airConditioning: (f.airConditioning as boolean | null) ?? null,
+      parking: (f.parking as boolean | null) ?? null,
+      otherFeatures: (f.otherFeatures as string[] | null) ?? null,
+    };
+  }
+
   private hydrateListing(
     compact: CompactListing,
     source: "immobiliare" | "idealista",
@@ -57,7 +87,7 @@ export class LocalDB implements DB {
         zone: zone.name,
         zoneId: zone.id,
       },
-      features: compact.features,
+      features: this.normalizeFeatures(compact.features),
       url: source === "immobiliare"
         ? `https://www.immobiliare.it/annunci/${sourceId}/`
         : `https://www.idealista.it/immobile/${sourceId}/`,
@@ -140,7 +170,7 @@ export class LocalDB implements DB {
       sourceId: listing.sourceId,
       title: listing.title,
       price: listing.price,
-      ...(listing.previousPrice && { previousPrice: listing.previousPrice }),
+      ...(listing.previousPrice !== undefined ? { previousPrice: listing.previousPrice } : {}),
       images: listing.images,
       features: listing.features,
     };
@@ -263,13 +293,48 @@ export class LocalDB implements DB {
     return listings;
   }
 
+  private arraysEqual(a: unknown, b: unknown): boolean {
+    if (a === b) return true;
+    if (!Array.isArray(a) || !Array.isArray(b)) return false;
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
+  }
+
+  private deepEqual(a: unknown, b: unknown): boolean {
+    if (a === b) return true;
+    if (a === null || b === null) return a === b;
+    if (typeof a !== typeof b) return false;
+
+    if (Array.isArray(a) || Array.isArray(b)) {
+      return this.arraysEqual(a, b);
+    }
+
+    if (typeof a === "object") {
+      const aObj = a as Record<string, unknown>;
+      const bObj = b as Record<string, unknown>;
+      const aKeys = Object.keys(aObj).sort();
+      const bKeys = Object.keys(bObj).sort();
+      if (aKeys.length !== bKeys.length) return false;
+      for (let i = 0; i < aKeys.length; i++) {
+        if (aKeys[i] !== bKeys[i]) return false;
+      }
+      for (const key of aKeys) {
+        if (!this.deepEqual(aObj[key], bObj[key])) return false;
+      }
+      return true;
+    }
+
+    return false;
+  }
+
   private hasListingChanged(existing: Listing, updated: Listing): boolean {
     if (existing.price !== updated.price) return true;
-    if (existing.features?.area !== updated.features?.area) return true;
-    if (existing.features?.rooms !== updated.features?.rooms) return true;
-    if (existing.features?.bedrooms !== updated.features?.bedrooms) return true;
-    if (existing.features?.bathrooms !== updated.features?.bathrooms) return true;
-    if (existing.images?.length !== updated.images?.length) return true;
+    if (existing.title !== updated.title) return true;
+    if (!this.deepEqual(existing.features, updated.features)) return true;
+    if (!this.arraysEqual(existing.images, updated.images)) return true;
     return false;
   }
 
@@ -286,7 +351,14 @@ export class LocalDB implements DB {
         toSave.push(listing);
         added++;
       } else if (this.hasListingChanged(existingListing, listing)) {
-        toSave.push({ ...listing, previousPrice: existingListing.price });
+        const merged: Listing = { ...listing };
+        if (existingListing.price !== listing.price) {
+          merged.previousPrice = existingListing.price;
+        } else if (existingListing.previousPrice !== undefined && merged.previousPrice === undefined) {
+          merged.previousPrice = existingListing.previousPrice;
+        }
+
+        toSave.push(merged);
         updated++;
       } else {
         // Keep existing listing as-is

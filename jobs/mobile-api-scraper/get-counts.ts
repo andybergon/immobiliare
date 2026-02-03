@@ -3,9 +3,9 @@
  * Get listing counts from immobiliare.it using the mobile API (free, fast)
  *
  * Usage:
- *   bun run jobs/collect-data/get-counts.ts           # All zones
- *   bun run jobs/collect-data/get-counts.ts --area=centro
- *   bun run jobs/collect-data/get-counts.ts --zones=axa,trastevere
+ *   bun run jobs/mobile-api-scraper/get-counts.ts           # All zones
+ *   bun run jobs/mobile-api-scraper/get-counts.ts --area=centro
+ *   bun run jobs/mobile-api-scraper/get-counts.ts --zones=axa,trastevere
  */
 import { readFileSync } from "fs";
 import { resolve } from "path";

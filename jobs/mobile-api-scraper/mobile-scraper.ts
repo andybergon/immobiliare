@@ -37,21 +37,28 @@ interface MobileApiProperty {
     zipcode?: string;
   };
   topology?: {
-    typology?: string;
+    typology?: string | { id?: number; name?: string };
     surface?: { size?: number | string };
     rooms?: number | string;
     bathrooms?: number | string;
     floor?: number | string;
     lift?: boolean;
     balcony?: boolean;
+    terrace?: boolean;
+    cellar?: boolean;
+    furnished?: boolean;
+    isLuxury?: boolean;
   };
   analytics?: {
     price?: number | string;
     typology?: string;
     numBedrooms?: number | string;
     elevator?: boolean;
+    floor?: number | string;
     propertyStatus?: string;
     agencyName?: string;
+    heating?: string;
+    otherFeatures?: string[];
   };
   lastModified?: string;
   creationDate?: string;
@@ -80,6 +87,70 @@ function parseNumber(value: string | number | undefined | null): number | null {
   return match ? parseInt(match[1], 10) : null;
 }
 
+function parseCount(value: string | number | undefined | null): { value: number | null; raw: string | null } {
+  if (value === undefined || value === null) return { value: null, raw: null };
+  if (typeof value === "number") return { value, raw: null };
+
+  const s = String(value).trim();
+  if (!s) return { value: null, raw: null };
+
+  const plusMatch = s.match(/^(\d+)\s*\+$/);
+  if (plusMatch) {
+    return { value: parseInt(plusMatch[1], 10), raw: `${plusMatch[1]}+` };
+  }
+
+  const intMatch = s.match(/^(\d+)$/);
+  if (intMatch) {
+    return { value: parseInt(intMatch[1], 10), raw: null };
+  }
+
+  const anyDigits = s.match(/(\d+)/);
+  if (!anyDigits) {
+    return { value: null, raw: s };
+  }
+
+  return { value: parseInt(anyDigits[1], 10), raw: s };
+}
+
+function parseFloor(value: string | number | undefined | null): { value: number | null; raw: string | null } {
+  if (value === undefined || value === null) return { value: null, raw: null };
+  if (typeof value === "number") return { value, raw: null };
+  const s = String(value).trim();
+  if (!s) return { value: null, raw: null };
+  if (/^-?\d+$/.test(s)) return { value: parseInt(s, 10), raw: null };
+  return { value: null, raw: s };
+}
+
+function normalizeOtherFeatures(value: unknown): string[] | null {
+  if (!Array.isArray(value)) return null;
+  const normalized = value
+    .filter((v): v is string => typeof v === "string")
+    .map((v) => v.trim().toLowerCase())
+    .filter(Boolean);
+  if (normalized.length === 0) return null;
+  normalized.sort();
+  return Array.from(new Set(normalized));
+}
+
+function getTypologyName(property: MobileApiProperty): string | null {
+  const fromAnalytics = property.analytics?.typology?.trim();
+  if (fromAnalytics) return fromAnalytics;
+
+  const topo = property.topology?.typology;
+  if (typeof topo === "string") return topo.trim() || null;
+  if (topo && typeof topo === "object" && "name" in topo) {
+    const name = (topo as { name?: unknown }).name;
+    if (typeof name === "string" && name.trim()) return name.trim();
+  }
+
+  return null;
+}
+
+function hasAnyFeature(otherFeatures: string[] | null, needles: string[]): boolean {
+  if (!otherFeatures) return false;
+  return otherFeatures.some((f) => needles.some((n) => f.includes(n)));
+}
+
 function extractImages(property: MobileApiProperty): string[] {
   const imageIds: string[] = [];
   if (property.media?.images) {
@@ -103,15 +174,33 @@ function normalizeMobileApiResult(property: MobileApiProperty, zone: Zone): List
   const priceFormatted = property.price?.value || `€ ${price.toLocaleString("it-IT")}`;
   const images = extractImages(property);
 
-  const typology = property.analytics?.typology || property.topology?.typology || "Immobile";
+  const typologyName = getTypologyName(property);
+  const titleTypology = typologyName || "Immobile";
   const microzone = property.geography?.microzone?.name || zone.name;
-  const title = `${typology} in ${microzone}`;
+  const title = `${titleTypology} in ${microzone}`;
 
   const area = parseNumber(property.topology?.surface?.size);
-  const rooms = parseNumber(property.topology?.rooms);
-  const bathrooms = parseNumber(property.topology?.bathrooms);
-  const floor = parseNumber(property.topology?.floor);
-  const bedrooms = parseNumber(property.analytics?.numBedrooms);
+  const roomsParsed = parseCount(property.topology?.rooms);
+  const bathroomsParsed = parseCount(property.topology?.bathrooms);
+  const bedroomsParsed = parseCount(property.analytics?.numBedrooms);
+  const floorParsed = parseFloor(property.topology?.floor ?? property.analytics?.floor);
+  const otherFeatures = normalizeOtherFeatures(property.analytics?.otherFeatures);
+
+  const balcony = property.topology?.balcony ?? (hasAnyFeature(otherFeatures, ["balcone"]) ? true : null);
+  const terrace = property.topology?.terrace ?? (hasAnyFeature(otherFeatures, ["terrazzo"]) ? true : null);
+  const furnished =
+    property.topology?.furnished ?? (hasAnyFeature(otherFeatures, ["arredato"]) ? true : null);
+  const cellar = property.topology?.cellar ?? (hasAnyFeature(otherFeatures, ["cantina"]) ? true : null);
+  const luxury = property.topology?.isLuxury ?? null;
+
+  const airConditioning = hasAnyFeature(otherFeatures, ["aria condizion", "condizion", "climatizz"])
+    ? true
+    : null;
+  const parking = hasAnyFeature(otherFeatures, ["posto auto", "garage", "box", "parcheggio", "autorimessa"])
+    ? true
+    : null;
+
+  const heating = property.analytics?.heating || null;
   const elevator = property.topology?.lift ?? property.analytics?.elevator ?? null;
   const condition = property.analytics?.propertyStatus || null;
 
@@ -135,15 +224,29 @@ function normalizeMobileApiResult(property: MobileApiProperty, zone: Zone): List
     },
     features: {
       area,
-      rooms,
-      bedrooms,
-      bathrooms,
-      floor,
+      rooms: roomsParsed.value,
+      roomsRaw: roomsParsed.raw,
+      bedrooms: bedroomsParsed.value,
+      bedroomsRaw: bedroomsParsed.raw,
+      bathrooms: bathroomsParsed.value,
+      bathroomsRaw: bathroomsParsed.raw,
+      floor: floorParsed.value,
+      floorRaw: floorParsed.raw,
       totalFloors: null,
       elevator,
       energyClass: null,
       yearBuilt: null,
       condition,
+      typology: typologyName,
+      heating,
+      balcony,
+      terrace,
+      furnished,
+      cellar,
+      luxury,
+      airConditioning,
+      parking,
+      otherFeatures,
     },
     url,
     scrapedAt: new Date().toISOString(),
@@ -154,20 +257,16 @@ async function resolveSearchParams(zone: Zone & { immobiliareZ2?: number; immobi
   // Use z3 (microzone) if available, otherwise z2 (macrozone)
   if (zone.immobiliareZ3) {
     return {
-      c: "6737",      // Roma city ID
       cat: "1",       // Category: vendita
       t: "v",         // Type: vendita
-      pr: "RM",       // Province: Roma
       z3: String(zone.immobiliareZ3),  // Microzone ID
     };
   }
 
   if (zone.immobiliareZ2) {
     return {
-      c: "6737",      // Roma city ID
       cat: "1",       // Category: vendita
       t: "v",         // Type: vendita
-      pr: "RM",       // Province: Roma
       z2: String(zone.immobiliareZ2),  // Macrozone ID (broader area)
     };
   }

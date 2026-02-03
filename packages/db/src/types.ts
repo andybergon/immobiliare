@@ -30,14 +30,28 @@ export interface CompactSnapshot {
 export interface ListingFeatures {
   area: number | null;
   rooms: number | null;
+  roomsRaw: string | null;
   bedrooms: number | null;
+  bedroomsRaw: string | null;
   bathrooms: number | null;
+  bathroomsRaw: string | null;
   floor: number | null;
+  floorRaw: string | null;
   totalFloors: number | null;
   elevator: boolean | null;
   energyClass: string | null;
   yearBuilt: number | null;
   condition: string | null;
+  typology: string | null;
+  heating: string | null;
+  balcony: boolean | null;
+  terrace: boolean | null;
+  furnished: boolean | null;
+  cellar: boolean | null;
+  luxury: boolean | null;
+  airConditioning: boolean | null;
+  parking: boolean | null;
+  otherFeatures: string[] | null;
 }
 
 export interface Listing {

@@ -65,6 +65,36 @@ function parseNumber(value: string | number | undefined | null): number | null {
   return match ? parseInt(match[1], 10) : null;
 }
 
+function parseCount(value: string | number | undefined | null): { value: number | null; raw: string | null } {
+  if (value === undefined || value === null) return { value: null, raw: null };
+  if (typeof value === "number") return { value, raw: null };
+  const s = value.trim();
+  if (!s) return { value: null, raw: null };
+
+  const plusMatch = s.match(/^(\d+)\s*\+$/);
+  if (plusMatch) {
+    return { value: parseInt(plusMatch[1], 10), raw: `${plusMatch[1]}+` };
+  }
+
+  const intMatch = s.match(/^(\d+)$/);
+  if (intMatch) {
+    return { value: parseInt(intMatch[1], 10), raw: null };
+  }
+
+  const anyDigits = s.match(/(\d+)/);
+  if (!anyDigits) return { value: null, raw: s };
+  return { value: parseInt(anyDigits[1], 10), raw: s };
+}
+
+function parseFloor(value: string | number | undefined | null): { value: number | null; raw: string | null } {
+  if (value === undefined || value === null) return { value: null, raw: null };
+  if (typeof value === "number") return { value, raw: null };
+  const s = value.trim();
+  if (!s) return { value: null, raw: null };
+  if (/^-?\d+$/.test(s)) return { value: parseInt(s, 10), raw: null };
+  return { value: null, raw: s };
+}
+
 function parsePrice(value: unknown): { price: number; formatted: string } {
   if (!value) return { price: 0, formatted: "N/A" };
   if (typeof value === "number") {
@@ -119,10 +149,10 @@ function normalizeApifyResult(result: ApifyListingResult, zone: Zone): Listing |
 
   const images = extractImages(result);
   const area = parseNumber(getMainDataValue(result, "Surface"));
-  const rooms = parseNumber(getMainDataValue(result, "Rooms"));
-  const bathrooms = parseNumber(getMainDataValue(result, "Bathrooms"));
-  const floor = parseNumber(getMainDataValue(result, "Floor"));
-  const bedrooms = parseNumber(getMainDataValue(result, "Bedrooms") || result.analytics?.numBedrooms);
+  const roomsParsed = parseCount(getMainDataValue(result, "Rooms"));
+  const bathroomsParsed = parseCount(getMainDataValue(result, "Bathrooms"));
+  const floorParsed = parseFloor(getMainDataValue(result, "Floor"));
+  const bedroomsParsed = parseCount(getMainDataValue(result, "Bedrooms") || result.analytics?.numBedrooms);
   const energyClass = result.energyClass?.value || null;
   const elevator = result.analytics?.elevator ?? null;
 
@@ -142,7 +172,7 @@ function normalizeApifyResult(result: ApifyListingResult, zone: Zone): Listing |
     images,
     location: {
       region: result.analytics?.region || zone.region,
-      province: result.analytics?.province || zone.province,
+      province: result.analytics?.province || "",
       city: zone.city,
       zone: result.analytics?.microzone || zone.name,
       zoneId: zone.id,
@@ -150,15 +180,29 @@ function normalizeApifyResult(result: ApifyListingResult, zone: Zone): Listing |
     },
     features: {
       area,
-      rooms,
-      bedrooms,
-      bathrooms,
-      floor,
+      rooms: roomsParsed.value,
+      roomsRaw: roomsParsed.raw,
+      bedrooms: bedroomsParsed.value,
+      bedroomsRaw: bedroomsParsed.raw,
+      bathrooms: bathroomsParsed.value,
+      bathroomsRaw: bathroomsParsed.raw,
+      floor: floorParsed.value,
+      floorRaw: floorParsed.raw,
       totalFloors: null,
       elevator,
       energyClass,
       yearBuilt: null,
       condition: result.analytics?.propertyStatus || null,
+      typology: result.analytics?.typology || null,
+      heating: null,
+      balcony: null,
+      terrace: null,
+      furnished: null,
+      cellar: null,
+      luxury: null,
+      airConditioning: null,
+      parking: null,
+      otherFeatures: null,
     },
     url,
     scrapedAt: new Date().toISOString(),

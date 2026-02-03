@@ -18,7 +18,7 @@ Turborepo + Bun monorepo for a real estate price guessing game using Rome listin
 ├── packages/
 │   └── db/                       # @ipg/db - Database abstraction
 ├── jobs/
-│   └── collect-data/             # Data collection (mobile API or Apify)
+│   └── mobile-api-scraper/       # Data collection (mobile API + Apify fallback)
 ├── data/
 │   ├── zones.json                # Zone definitions (source of truth)
 │   └── listings/                 # Hierarchical listing storage
@@ -132,16 +132,16 @@ bun run build            # Build all packages
 bun run dev              # Dev mode (all packages)
 
 # Data collection (mobile API is default, free, and recommended)
-bun run jobs/collect-data                              # Show help
-bun run jobs/collect-data -- --zones=axa               # Scrape Axa (mobile API)
-bun run jobs/collect-data -- --zones=axa,trastevere    # Multiple zones
-bun run jobs/collect-data -- --area=litorale           # All litorale zones
-bun run jobs/collect-data -- --all                     # All 51 zones
-bun run jobs/collect-data -- --zones=axa --limit=500   # Custom limit
-bun run jobs/collect-data -- --scraper=apify           # Use Apify instead (paid)
-bun run jobs/collect-data -- --sleep-between-listings-ms=100  # Delay between pages (default: 50ms)
-bun run jobs/collect-data -- --sleep-between-zones-s=5        # Delay between zones (default: 0)
-bun run jobs/collect-data -- --dry-run                 # Preview only (shows time estimate)
+bun run jobs/mobile-api-scraper                              # Show help
+bun run jobs/mobile-api-scraper -- --zones=axa               # Scrape Axa (mobile API)
+bun run jobs/mobile-api-scraper -- --zones=axa,trastevere    # Multiple zones
+bun run jobs/mobile-api-scraper -- --area=litorale           # All litorale zones
+bun run jobs/mobile-api-scraper -- --all                     # All 51 zones
+bun run jobs/mobile-api-scraper -- --zones=axa --limit=500   # Custom limit
+bun run jobs/mobile-api-scraper -- --scraper=apify           # Use Apify instead (paid)
+bun run jobs/mobile-api-scraper -- --sleep-between-listings-ms=100  # Delay between pages (default: 50ms)
+bun run jobs/mobile-api-scraper -- --sleep-between-zones-s=5        # Delay between zones (default: 0)
+bun run jobs/mobile-api-scraper -- --dry-run                 # Preview only (shows time estimate)
 ```
 
 ## Storage
@@ -181,8 +181,8 @@ Uses the immobiliare.it mobile app API (`ios-imm-v4.ws-app.com`). **Free, fast, 
 - No limit on results
 
 ```bash
-bun run jobs/collect-data -- --zones=axa              # Uses mobile API by default
-bun run jobs/collect-data -- --scraper=mobile         # Explicit
+bun run jobs/mobile-api-scraper -- --zones=axa              # Uses mobile API by default
+bun run jobs/mobile-api-scraper -- --scraper=mobile         # Explicit
 ```
 
 ### Apify Scraper (Fallback)
@@ -190,8 +190,8 @@ bun run jobs/collect-data -- --scraper=mobile         # Explicit
 Uses Apify actor `memo23/immobiliare-scraper` (~$0.70/1000 listings). Requires `APIFY_TOKEN`.
 
 ```bash
-bun run jobs/collect-data -- --zones=axa --scraper=apify
-bun run jobs/collect-data -- --zones=axa --scraper=apify --max-pages=10
+bun run jobs/mobile-api-scraper -- --zones=axa --scraper=apify
+bun run jobs/mobile-api-scraper -- --zones=axa --scraper=apify --max-pages=10
 ```
 
 **Apify Setup:**
@@ -211,6 +211,8 @@ Both scrapers use the same deduplication logic:
 ## Immobiliare.it Mobile API
 
 The mobile app API (`ios-imm-v4.ws-app.com`) is publicly accessible without DataDome blocking. **This is now the default scraper** - it returns full listing data, not just counts.
+
+Field mapping (what the list payload contains vs what we store): `jobs/mobile-api-scraper/CLAUDE.md`.
 
 ### Endpoints
 
@@ -312,26 +314,26 @@ This is intentional - storing both z2 and z3 lets us decide later how to group/d
 
 ```bash
 # Get all zones by sampling properties
-bun run jobs/collect-data/get-all-zones.ts
+bun run jobs/mobile-api-scraper/get-all-zones.ts
 
 # Test specific zone IDs
-curl "https://ios-imm-v4.ws-app.com/b2c/v1/properties?c=6737&cat=1&t=v&pr=RM&z3=10962&start=0"
+curl "https://ios-imm-v4.ws-app.com/b2c/v1/properties?cat=1&t=v&z3=10962&start=0"
 ```
 
 ### Get Counts Script
 
 ```bash
 # Get listing counts for all zones (free, instant)
-bun run jobs/collect-data/get-counts.ts
+bun run jobs/mobile-api-scraper/get-counts.ts
 
 # Filter by area
-bun run jobs/collect-data/get-counts.ts --area=litorale
+bun run jobs/mobile-api-scraper/get-counts.ts --area=litorale
 
 # Specific zones
-bun run jobs/collect-data/get-counts.ts --zones=axa,trastevere
+bun run jobs/mobile-api-scraper/get-counts.ts --zones=axa,trastevere
 
 # JSON output
-bun run jobs/collect-data/get-counts.ts --json
+bun run jobs/mobile-api-scraper/get-counts.ts --json
 ```
 
 ## App Routes
@@ -447,14 +449,14 @@ Browser extensions like Dark Reader inject attributes (`data-darkreader-*`), cau
 
 Run the collector for that zone:
 ```bash
-bun run jobs/collect-data -- --zones=trastevere
+bun run jobs/mobile-api-scraper -- --zones=trastevere
 ```
 
 ### Hit Limit Warning
 
 If you see `⚠️ Hit limit (1000)`, the zone has more listings. Increase limit:
 ```bash
-bun run jobs/collect-data -- --zones=ostia-ponente --limit=2000
+bun run jobs/mobile-api-scraper -- --zones=ostia-ponente --limit=2000
 ```
 
 ### Network/VPN Issues

@@ -4,7 +4,7 @@
  * - Convert full image URLs to just image IDs
  * - Remove redundant fields (id, url, source, location, scrapedAt per listing, priceFormatted)
  *
- * Run with: bun run jobs/collect-data/migrate-compact.ts
+ * Run with: bun run jobs/mobile-api-scraper/migrate-compact.ts
  * Add --dry-run to preview changes without saving
  */
 

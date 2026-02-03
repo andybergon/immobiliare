@@ -2,12 +2,14 @@ import { LocalDB, type Snapshot } from "@ipg/db";
 import { getZonesBySlug, getAllZones, getZonesByArea, getAreas } from "./zones.js";
 import { scrapeWithMobileApi } from "./mobile-scraper.js";
 import { scrapeWithApify } from "./apify-scraper.js";
+import { existsSync } from "fs";
+import { readFile } from "fs/promises";
 import { resolve } from "path";
 
 // Load .env.local from project root if it exists
 const envPath = resolve(import.meta.dirname, "../../.env.local");
-if (await Bun.file(envPath).exists()) {
-  const content = await Bun.file(envPath).text();
+if (existsSync(envPath)) {
+  const content = await readFile(envPath, "utf-8");
   for (const line of content.split("\n")) {
     const [key, ...valueParts] = line.split("=");
     if (key && valueParts.length) {
@@ -38,10 +40,8 @@ async function getZoneListingCount(zone: { immobiliareZ2?: number; immobiliareZ3
   if (!zone.immobiliareZ3 && !zone.immobiliareZ2) return null;
 
   const params = new URLSearchParams({
-    c: "6737",
     cat: "1",
     t: "v",
-    pr: "RM",
     ...(zone.immobiliareZ3 ? { z3: String(zone.immobiliareZ3) } : { z2: String(zone.immobiliareZ2) }),
   });
 
@@ -175,7 +175,7 @@ async function main(): Promise<void> {
     console.log(`
 🏠 Il Prezzo Giusto - Data Collection
 
-Usage: bun run jobs/collect-data -- [options]
+Usage: bun run jobs/mobile-api-scraper -- [options]
 
 Options:
   --zones=axa,trastevere      Comma-separated zone slugs

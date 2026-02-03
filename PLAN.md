@@ -112,8 +112,8 @@ The scraping job is blocked by DataDome CAPTCHA protection on immobiliare.it. Op
 # Run the app
 cd apps/ipg && bun dev
 
-# Test data collection (will be blocked by CAPTCHA)
-bun run jobs/collect-data -- --zones=axa --limit=5 --no-headless
+# Test data collection (mobile API)
+bun run jobs/mobile-api-scraper -- --zones=axa --limit=5
 ```
 
 ---
@@ -143,8 +143,10 @@ immobiliare/
 │           ├── local.ts            # JSON storage
 │           └── index.ts
 ├── jobs/
-│   └── collect-data/               # Playwright scraper
+│   └── mobile-api-scraper/         # Data collection (mobile API + Apify fallback)
 │       ├── index.ts
+│       ├── mobile-scraper.ts
+│       ├── apify-scraper.ts
 │       └── zones.ts
 ├── data/
 │   ├── zones.json
