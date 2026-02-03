@@ -5,6 +5,16 @@ This job consumes listing summaries from the immobiliare.it mobile API:
 - `GET https://ios-imm-v4.ws-app.com/b2c/v1/properties?...` (same on `android-imm-v4.ws-app.com`)
 - We currently scrape via the list endpoint only; direct detail endpoints like `/b2c/v1/properties/{id}` return 403.
 
+## Storage
+
+- **Compact snapshot (used by the app):** `data/listings/**/immobiliare.json`
+- **Raw mobile API payload dumps (for analysis/filtering later):** `data/raw/immobiliare/mobile-api/**/mobile-api-<timestamp>.json`
+
+Raw dumps preserve:
+- Search params + paging metadata
+- Per-page response metadata
+- Full per-listing objects as returned by the API (keyed by listing id)
+
 The tables below list the fields observed in the list payload (sampled across our 51 Rome zones) and whether we currently parse/persist them.
 
 Legend:
@@ -13,11 +23,13 @@ Legend:
   - ✅ = parsed
   - 🟨 = partially parsed
   - ❌ = not parsed
-- `Persisted`
+- `Persisted` (compact snapshot)
   - ✅ = stored in `data/listings/**/immobiliare.json` (possibly normalized)
   - 🧩 = used to build a stored value (not stored as-is)
   - 🟨 = partially stored
-  - ❌ = not stored
+  - ❌ = not stored in the compact snapshot
+
+Note: even when `Persisted` is ❌ in the compact snapshot, the raw dump still preserves the full original payload (see Storage section above).
 
 ## Top-Level Listing Object
 

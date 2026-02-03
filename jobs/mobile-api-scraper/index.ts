@@ -3,8 +3,8 @@ import { getZonesBySlug, getAllZones, getZonesByArea, getAreas } from "./zones.j
 import { scrapeWithMobileApi } from "./mobile-scraper.js";
 import { scrapeWithApify } from "./apify-scraper.js";
 import { existsSync } from "fs";
-import { readFile } from "fs/promises";
-import { resolve } from "path";
+import { mkdir, readFile, writeFile } from "fs/promises";
+import { relative, resolve } from "path";
 
 // Load .env.local from project root if it exists
 const envPath = resolve(import.meta.dirname, "../../.env.local");
@@ -28,10 +28,12 @@ interface CollectOptions {
   sleepBetweenListings?: number;
   sleepBetweenZones?: number;
   dryRun?: boolean;
+  saveRaw?: boolean;
 }
 
 const DATA_DIR = resolve(import.meta.dirname, "../../data");
 const db = new LocalDB({ dataDir: DATA_DIR });
+const RAW_DIR = resolve(DATA_DIR, "raw");
 
 const PROPERTIES_URL = "https://ios-imm-v4.ws-app.com/b2c/v1/properties";
 const PAGE_SIZE = 20;
@@ -67,6 +69,20 @@ function formatDuration(seconds: number): string {
   const hours = Math.floor(mins / 60);
   const remainingMins = mins % 60;
   return `${hours}h ${remainingMins}m`;
+}
+
+function safeTimestampForFilename(iso: string): string {
+  // Avoid ":" (Windows) and keep filenames predictable.
+  return iso.replaceAll(":", "-").replaceAll(".", "-");
+}
+
+async function saveMobileApiRawDump(zone: Zone, scrapedAt: string, raw: unknown): Promise<string> {
+  const fileName = `mobile-api-${safeTimestampForFilename(scrapedAt)}.json`;
+  const dir = resolve(RAW_DIR, "immobiliare", "mobile-api", zone.region, zone.city, zone.area, zone.slug);
+  await mkdir(dir, { recursive: true });
+  const path = resolve(dir, fileName);
+  await writeFile(path, JSON.stringify(raw, null, 2));
+  return path;
 }
 
 async function collectZone(
@@ -117,6 +133,15 @@ async function collectZone(
     } else {
       console.log(`  ⚠️ No listings found`);
     }
+
+    if (
+      options.scraper === "mobile" &&
+      options.saveRaw !== false &&
+      result.raw
+    ) {
+      const rawPath = await saveMobileApiRawDump(zone, result.metadata.scrapedAt, result.raw);
+      console.log(`  💾 Saved raw mobile API payload: ${relative(process.cwd(), rawPath)}`);
+    }
   } catch (err) {
     console.error(`  ❌ Error:`, err);
   }
@@ -128,6 +153,7 @@ async function main(): Promise<void> {
   const options: CollectOptions = {
     zones: [],
     scraper: "mobile",
+    saveRaw: true,
   };
 
   let area: string | null = null;
@@ -156,6 +182,10 @@ async function main(): Promise<void> {
       options.sleepBetweenZones = parseInt(arg.replace("--sleep-between-zones-s=", ""), 10);
     } else if (arg === "--all") {
       options.zones = getAllZones().map((z) => z.slug);
+    } else if (arg === "--no-raw") {
+      options.saveRaw = false;
+    } else if (arg === "--raw") {
+      options.saveRaw = true;
     }
   }
 
@@ -188,6 +218,7 @@ Options:
   --scraper=mobile|apify      Scraper to use (default: mobile)
   --sleep-between-listings-ms=50  Milliseconds between page fetches (default: 50)
   --sleep-between-zones-s=2       Seconds between zones (default: 0)
+  --no-raw                    Don't save raw mobile API payload dumps (mobile scraper only)
   --dry-run                       Don't actually scrape
 
 Scrapers:
@@ -219,6 +250,7 @@ ${allZones.map((z) => `  - ${z.slug} (${z.name}) [${z.area}]`).join("\n")}
   if (options.maxPages && options.scraper === "apify") console.log(`Max pages: ${options.maxPages}`);
   if (options.sleepBetweenListings) console.log(`Sleep between listings: ${options.sleepBetweenListings}ms`);
   if (options.sleepBetweenZones) console.log(`Sleep between zones: ${options.sleepBetweenZones}s`);
+  if (options.saveRaw === false) console.log(`Raw dumps: disabled`);
   if (options.dryRun) console.log(`Mode: DRY RUN`);
 
   // Fetch listing counts and estimate time

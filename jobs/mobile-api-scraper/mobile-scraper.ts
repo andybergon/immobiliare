@@ -14,6 +14,7 @@ export interface ScrapeResult {
     hitLimit: boolean;
     scrapedAt: string;
   };
+  raw?: MobileApiScrapeDump;
 }
 
 interface MobileApiProperty {
@@ -77,6 +78,56 @@ interface ResolverResponse {
   params?: Record<string, string | number>;
 }
 
+export interface MobileApiPageDump {
+  offset: number;
+  url: string;
+  fetchedAt: string;
+  ok: boolean;
+  status: number;
+  headers: Record<string, string>;
+  totalActive?: number;
+  count?: number;
+  offsetReturned?: number;
+  propertyIds?: string[];
+  error?: string;
+}
+
+export interface MobileApiResolverDump {
+  url: string;
+  fetchedAt: string;
+  ok: boolean;
+  status: number;
+  headers: Record<string, string>;
+  body?: unknown;
+  error?: string;
+}
+
+export interface MobileApiScrapeDump {
+  schemaVersion: 1;
+  scrapedAt: string;
+  zone: Pick<Zone, "id" | "name" | "slug" | "region" | "city" | "area" | "immobiliareZ2" | "immobiliareZ3">;
+  request: {
+    propertiesUrl: string;
+    resolverUrl: string;
+    params: Record<string, string>;
+    limit: number;
+    pageSize: number;
+    pageDelayMs: number;
+  };
+  resolver?: MobileApiResolverDump;
+  pages: MobileApiPageDump[];
+  propertiesById: Record<string, unknown>;
+  propertiesMissingId: unknown[];
+  stats: {
+    totalActive: number;
+    fetchedProperties: number;
+    uniqueProperties: number;
+    normalizedListings: number;
+    normalizedFailed: number;
+    uniqueListings: number;
+  };
+}
+
 function buildSearchUrl(zone: Zone): string {
   return `https://www.immobiliare.it/vendita-case/${zone.city}/${zone.slug}/`;
 }
@@ -125,7 +176,7 @@ function extractImages(property: MobileApiProperty): string[] {
   return imageIds;
 }
 
-function normalizeMobileApiResult(property: MobileApiProperty, zone: Zone): Listing | null {
+function normalizeMobileApiResult(property: MobileApiProperty, zone: Zone, scrapedAt: string): Listing | null {
   const sourceId = String(property.id || "");
   if (!sourceId) return null;
 
@@ -209,46 +260,72 @@ function normalizeMobileApiResult(property: MobileApiProperty, zone: Zone): List
       otherFeatures,
     },
     url,
-    scrapedAt: new Date().toISOString(),
+    scrapedAt,
   };
 }
 
-async function resolveSearchParams(zone: Zone & { immobiliareZ2?: number; immobiliareZ3?: number }): Promise<Record<string, string> | null> {
+function headersToObject(headers: Headers): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [k, v] of headers.entries()) out[k] = v;
+  return out;
+}
+
+async function resolveSearchParams(
+  zone: Zone & { immobiliareZ2?: number; immobiliareZ3?: number }
+): Promise<{ params: Record<string, string> | null; resolver?: MobileApiResolverDump }> {
   // Use z3 (microzone) if available, otherwise z2 (macrozone)
   if (zone.immobiliareZ3) {
-    return {
+    return { params: {
       cat: "1",       // Category: vendita
       t: "v",         // Type: vendita
       z3: String(zone.immobiliareZ3),  // Microzone ID
-    };
+    } };
   }
 
   if (zone.immobiliareZ2) {
-    return {
+    return { params: {
       cat: "1",       // Category: vendita
       t: "v",         // Type: vendita
       z2: String(zone.immobiliareZ2),  // Macrozone ID (broader area)
-    };
+    } };
   }
 
   // Fallback: use URL resolver
   const searchUrl = buildSearchUrl(zone);
   console.log(`  ⚠️ No zone ID, using URL resolver`);
 
-  const response = await fetch(`${RESOLVER_URL}?url=${encodeURIComponent(searchUrl)}`, {
-    headers: { "User-Agent": "Mozilla/5.0" },
-  });
+  const resolverUrl = `${RESOLVER_URL}?url=${encodeURIComponent(searchUrl)}`;
+  const fetchedAt = new Date().toISOString();
+
+  const response = await fetch(resolverUrl, { headers: { "User-Agent": "Mozilla/5.0" } });
+  const dump: MobileApiResolverDump = {
+    url: resolverUrl,
+    fetchedAt,
+    ok: response.ok,
+    status: response.status,
+    headers: headersToObject(response.headers),
+  };
 
   if (!response.ok) {
     console.log(`  ❌ Resolver failed: ${response.status}`);
-    return null;
+    dump.error = `Resolver failed: ${response.status}`;
+    return { params: null, resolver: dump };
   }
 
-  const data: ResolverResponse = await response.json();
+  let data: ResolverResponse;
+  try {
+    data = (await response.json()) as ResolverResponse;
+    dump.body = data as unknown;
+  } catch (err) {
+    console.log(`  ❌ Resolver JSON parse failed`);
+    dump.error = err instanceof Error ? err.message : String(err);
+    return { params: null, resolver: dump };
+  }
 
   if (data.type !== "search" || !data.params) {
     console.log(`  ❌ Invalid resolver response: type=${data.type}`);
-    return null;
+    dump.error = `Invalid resolver response: type=${data.type}`;
+    return { params: null, resolver: dump };
   }
 
   const params: Record<string, string> = {};
@@ -256,22 +333,40 @@ async function resolveSearchParams(zone: Zone & { immobiliareZ2?: number; immobi
     params[key] = String(value);
   }
 
-  return params;
+  return { params, resolver: dump };
 }
 
-async function fetchPage(params: Record<string, string>, offset: number): Promise<MobileApiResponse> {
+async function fetchPage(params: Record<string, string>, offset: number): Promise<{ dump: MobileApiPageDump; body: MobileApiResponse | null }> {
   const urlParams = new URLSearchParams(params);
   urlParams.set("start", String(offset));
+  const url = `${PROPERTIES_URL}?${urlParams}`;
+  const fetchedAt = new Date().toISOString();
 
-  const response = await fetch(`${PROPERTIES_URL}?${urlParams}`, {
+  const response = await fetch(url, {
     headers: { "User-Agent": "Mozilla/5.0" },
   });
 
+  const dump: MobileApiPageDump = {
+    offset,
+    url,
+    fetchedAt,
+    ok: response.ok,
+    status: response.status,
+    headers: headersToObject(response.headers),
+  };
+
   if (!response.ok) {
-    throw new Error(`Properties API failed: ${response.status}`);
+    dump.error = `Properties API failed: ${response.status}`;
+    return { dump, body: null };
   }
 
-  return response.json();
+  try {
+    const body = (await response.json()) as MobileApiResponse;
+    return { dump, body };
+  } catch (err) {
+    dump.error = err instanceof Error ? err.message : String(err);
+    return { dump, body: null };
+  }
 }
 
 export async function scrapeWithMobileApi(
@@ -291,8 +386,8 @@ export async function scrapeWithMobileApi(
     console.log(`  Search URL: ${buildSearchUrl(zone)} (resolver)`);
   }
 
-  const params = await resolveSearchParams(zone);
-  if (!params) {
+  const resolved = await resolveSearchParams(zone);
+  if (!resolved.params) {
     return {
       listings: [],
       metadata: {
@@ -301,10 +396,98 @@ export async function scrapeWithMobileApi(
         hitLimit: false,
         scrapedAt,
       },
+      raw: {
+        schemaVersion: 1,
+        scrapedAt,
+        zone: {
+          id: zone.id,
+          name: zone.name,
+          slug: zone.slug,
+          region: zone.region,
+          city: zone.city,
+          area: zone.area,
+          immobiliareZ2: zone.immobiliareZ2,
+          immobiliareZ3: zone.immobiliareZ3,
+        },
+        request: {
+          propertiesUrl: PROPERTIES_URL,
+          resolverUrl: RESOLVER_URL,
+          params: {},
+          limit,
+          pageSize: PAGE_SIZE,
+          pageDelayMs: pageDelay,
+        },
+        ...(resolved.resolver ? { resolver: resolved.resolver } : {}),
+        pages: [],
+        propertiesById: {},
+        propertiesMissingId: [],
+        stats: {
+          totalActive: 0,
+          fetchedProperties: 0,
+          uniqueProperties: 0,
+          normalizedListings: 0,
+          normalizedFailed: 0,
+          uniqueListings: 0,
+        },
+      },
     };
   }
 
-  const firstPage = await fetchPage(params, 0);
+  const params = resolved.params;
+  const pages: MobileApiPageDump[] = [];
+  const propertiesById = new Map<string, unknown>();
+  const propertiesMissingId: unknown[] = [];
+  const allPropertyIds: string[] = [];
+
+  const first = await fetchPage(params, 0);
+  pages.push(first.dump);
+  if (!first.body) {
+    return {
+      listings: [],
+      metadata: {
+        requestedLimit: limit,
+        returnedCount: 0,
+        hitLimit: false,
+        scrapedAt,
+      },
+      raw: {
+        schemaVersion: 1,
+        scrapedAt,
+        zone: {
+          id: zone.id,
+          name: zone.name,
+          slug: zone.slug,
+          region: zone.region,
+          city: zone.city,
+          area: zone.area,
+          immobiliareZ2: zone.immobiliareZ2,
+          immobiliareZ3: zone.immobiliareZ3,
+        },
+        request: {
+          propertiesUrl: PROPERTIES_URL,
+          resolverUrl: RESOLVER_URL,
+          params,
+          limit,
+          pageSize: PAGE_SIZE,
+          pageDelayMs: pageDelay,
+        },
+        ...(resolved.resolver ? { resolver: resolved.resolver } : {}),
+        pages,
+        propertiesById: {},
+        propertiesMissingId,
+        stats: {
+          totalActive: 0,
+          fetchedProperties: 0,
+          uniqueProperties: 0,
+          normalizedListings: 0,
+          normalizedFailed: 0,
+          uniqueListings: 0,
+        },
+      },
+    };
+  }
+
+  const firstPage = first.body;
   const totalAvailable = firstPage.totalActive || 0;
   const toFetch = Math.min(totalAvailable, limit);
 
@@ -313,7 +496,22 @@ export async function scrapeWithMobileApi(
     console.log(`  Limiting to: ${toFetch} (--limit=${limit})`);
   }
 
-  const allProperties: MobileApiProperty[] = firstPage.list || [];
+  const firstList = firstPage.list || [];
+  const firstIds: string[] = [];
+  for (const property of firstList) {
+    const id = typeof property?.id === "number" ? String(property.id) : null;
+    if (!id) {
+      propertiesMissingId.push(property as unknown);
+      continue;
+    }
+    propertiesById.set(id, property as unknown);
+    firstIds.push(id);
+    allPropertyIds.push(id);
+  }
+  pages[0].totalActive = firstPage.totalActive;
+  pages[0].count = firstPage.count;
+  pages[0].offsetReturned = firstPage.offset;
+  pages[0].propertyIds = firstIds;
   let offset = PAGE_SIZE;
 
   const totalPages = Math.ceil(toFetch / PAGE_SIZE);
@@ -324,21 +522,43 @@ export async function scrapeWithMobileApi(
     process.stdout.write(`  Fetching page ${currentPage}/${totalPages}...\r`);
 
     const page = await fetchPage(params, offset);
-    if (!page.list || page.list.length === 0) break;
+    pages.push(page.dump);
+    if (!page.body) break;
 
-    allProperties.push(...page.list);
+    const list = page.body.list || [];
+    if (list.length === 0) break;
+
+    const ids: string[] = [];
+    for (const property of list) {
+      const id = typeof property?.id === "number" ? String(property.id) : null;
+      if (!id) {
+        propertiesMissingId.push(property as unknown);
+        continue;
+      }
+      propertiesById.set(id, property as unknown);
+      ids.push(id);
+      allPropertyIds.push(id);
+    }
+
+    pages[pages.length - 1].totalActive = page.body.totalActive;
+    pages[pages.length - 1].count = page.body.count;
+    pages[pages.length - 1].offsetReturned = page.body.offset;
+    pages[pages.length - 1].propertyIds = ids;
+
     offset += PAGE_SIZE;
 
     await new Promise((r) => setTimeout(r, pageDelay));
   }
 
-  console.log(`  Fetched ${allProperties.length} raw results from ${currentPage} pages`);
+  console.log(`  Fetched ${allPropertyIds.length} raw results from ${currentPage} pages`);
 
   const listings: Listing[] = [];
   let failed = 0;
 
-  for (const property of allProperties) {
-    const listing = normalizeMobileApiResult(property, zone);
+  for (const id of allPropertyIds) {
+    const property = propertiesById.get(id) as MobileApiProperty | undefined;
+    if (!property) continue;
+    const listing = normalizeMobileApiResult(property, zone, scrapedAt);
     if (listing) {
       listings.push(listing);
     } else {
@@ -359,13 +579,52 @@ export async function scrapeWithMobileApi(
 
   const hitLimit = totalAvailable > limit;
 
+  const propertiesByIdObj: Record<string, unknown> = {};
+  for (const [id, value] of propertiesById.entries()) {
+    propertiesByIdObj[id] = value;
+  }
+
   return {
     listings: unique,
     metadata: {
       requestedLimit: limit,
-      returnedCount: allProperties.length,
+      returnedCount: allPropertyIds.length,
       hitLimit,
       scrapedAt,
+    },
+    raw: {
+      schemaVersion: 1,
+      scrapedAt,
+      zone: {
+        id: zone.id,
+        name: zone.name,
+        slug: zone.slug,
+        region: zone.region,
+        city: zone.city,
+        area: zone.area,
+        immobiliareZ2: zone.immobiliareZ2,
+        immobiliareZ3: zone.immobiliareZ3,
+      },
+      request: {
+        propertiesUrl: PROPERTIES_URL,
+        resolverUrl: RESOLVER_URL,
+        params,
+        limit,
+        pageSize: PAGE_SIZE,
+        pageDelayMs: pageDelay,
+      },
+      ...(resolved.resolver ? { resolver: resolved.resolver } : {}),
+      pages,
+      propertiesById: propertiesByIdObj,
+      propertiesMissingId,
+      stats: {
+        totalActive: totalAvailable,
+        fetchedProperties: allPropertyIds.length,
+        uniqueProperties: propertiesById.size,
+        normalizedListings: listings.length,
+        normalizedFailed: failed,
+        uniqueListings: unique.length,
+      },
     },
   };
 }
