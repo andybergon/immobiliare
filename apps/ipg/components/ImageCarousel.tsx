@@ -33,6 +33,7 @@ const MOBILE_BREAKPOINT = 768;
 const SERVER_WIDTH_FALLBACK = 1024;
 
 export function ImageCarousel({ images, title }: ImageCarouselProps) {
+  const [mounted, setMounted] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loadedIndex, setLoadedIndex] = useState(0);
   const [showLoader, setShowLoader] = useState(false);
@@ -40,6 +41,11 @@ export function ImageCarousel({ images, title }: ImageCarouselProps) {
   const [showSizeMenu, setShowSizeMenu] = useState(false);
   const [manualSize, setManualSize] = useState(false);
   const loaderTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
 
   const windowWidth = useSyncExternalStore(
     (onStoreChange) => {
@@ -168,14 +174,21 @@ export function ImageCarousel({ images, title }: ImageCarouselProps) {
       )}
 
       <div className="absolute top-2 right-2 flex items-center gap-2">
-        {isDev && (
+        {isDev && mounted && (
           <div className="relative">
             <button
               onClick={() => setShowSizeMenu((v) => !v)}
+              tabIndex={-1}
               className="bg-black/60 hover:bg-black/80 p-1.5 rounded-full transition-colors"
               aria-label="Image size"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                suppressHydrationWarning
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
@@ -190,6 +203,7 @@ export function ImageCarousel({ images, title }: ImageCarouselProps) {
                       setManualSize(true);
                       setShowSizeMenu(false);
                     }}
+                    tabIndex={-1}
                     className={`block w-full px-3 py-1.5 text-sm text-left hover:bg-white/20 ${size === imageSize ? "bg-white/30 font-bold" : ""}`}
                   >
                     {size}
